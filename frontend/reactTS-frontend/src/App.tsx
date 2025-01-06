@@ -10,6 +10,8 @@ import AdminDashboardPage from "./pages/AdminDashboardPage";
 import CreateEditThreadPage from "./pages/CreateEditThreadPage";
 import SearchPage from "./pages/SearchPage";
 import NotificationsPage from "./pages/NotificationsPage";
+import ProtectedRoute from "./components/ProtectedRoute";
+import AdminRoute from "./components/AdminRoute";
 
 const App = () => {
   const loginUser: User = {
@@ -27,24 +29,64 @@ const App = () => {
   return (
     <BrowserRouter>
       <Routes>
+        {/* General Users */}
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignUpPage />} />
-        <Route path="/thread/:id" element={<ThreadDetailsPage />} />
+        <Route path="/search" element={<SearchPage />} />
+        <Route path="*" element={<ErrorPage />} />
+
+        {/* Login Users */}
+        <Route
+          path="/thread/:id"
+          element={
+            <ProtectedRoute user={loginUser}>
+              <ThreadDetailsPage />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/user/:id"
-          element={<UserProfilePage user={loginUser} />}
+          element={
+            <ProtectedRoute user={loginUser}>
+              <UserProfilePage user={loginUser} />
+            </ProtectedRoute>
+          }
         />
-        <Route path="/create" element={<CreateEditThreadPage />} />
-        <Route path="/edit/:id" element={<CreateEditThreadPage />} />
-        <Route path="/search" element={<SearchPage />} />
+        <Route
+          path="/create"
+          element={
+            <ProtectedRoute user={loginUser}>
+              <CreateEditThreadPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/edit/:id"
+          element={
+            <ProtectedRoute user={loginUser}>
+              <CreateEditThreadPage />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/notifications"
-          element={<NotificationsPage user={loginUser} />}
+          element={
+            <ProtectedRoute user={loginUser}>
+              <NotificationsPage user={loginUser} />
+            </ProtectedRoute>
+          }
         />
 
-        <Route path="/admin" element={<AdminDashboardPage />} />
-        <Route path="*" element={<ErrorPage />} />
+        {/* Admin Only */}
+        <Route
+          path="/admin"
+          element={
+            <AdminRoute user={loginUser}>
+              <AdminDashboardPage />
+            </AdminRoute>
+          }
+        />
       </Routes>
     </BrowserRouter>
   );
