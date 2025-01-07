@@ -4,7 +4,7 @@ import { User } from "../models/models";
 
 const Navbar: React.FC<{ user: User | null }> = ({ user }) => {
   const navigate = useNavigate();
-  const isLogin = user !== null;
+  const isLogin: boolean = user !== null;
   const isAdmin: boolean = isLogin && user!.role === "admin";
 
   const handleLogOut = () => {
@@ -36,10 +36,12 @@ const Navbar: React.FC<{ user: User | null }> = ({ user }) => {
               </button>
             </li>
             <li>
-              <button onClick={() => navigate(`/user/:${user.id}`)}>
+              <button onClick={() => navigate(`/user/:${user!.id}`)}>
                 User Profile
                 <img
-                  src={user.profilePicture === null ? "" : user.profilePicture!}
+                  src={
+                    user!.profilePicture === null ? "" : user!.profilePicture!
+                  }
                   alt=""
                 />
               </button>

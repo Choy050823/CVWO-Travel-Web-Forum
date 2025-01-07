@@ -18,7 +18,7 @@ const App = () => {
     id: 1,
     username: "john_doe",
     password: "",
-    profilePicture: "https://randomuser.me/api/portraits",
+    profilePicture: "",
     email: "john_doe@gmail.com",
     bio: "Hello, I'm John Doe",
     role: "admin",
