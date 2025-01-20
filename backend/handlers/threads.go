@@ -27,6 +27,7 @@ func CreateThread(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	err = db.QueryRow(query, thread.Title, thread.Content, thread.UserID, thread.CategoryID).Scan(&thread.ID, &thread.CreatedAt)
 	if err != nil {
 		http.Error(w, "Failed to create thread", http.StatusInternalServerError)
+		print(err.Error())
 		return
 	}
 

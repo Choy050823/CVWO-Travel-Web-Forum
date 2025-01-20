@@ -17,16 +17,61 @@ func main() {
 	// Create a new router
 	r := mux.NewRouter()
 
+	// User routes
+	r.HandleFunc("/register", func(w http.ResponseWriter, r *http.Request) {
+		handlers.Register(w, r, database.DB)
+	}).Methods("POST")
+
+	r.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
+		handlers.Login(w, r, database.DB)
+	}).Methods("POST")
+
+	r.HandleFunc("/users/{id}", func(w http.ResponseWriter, r *http.Request) {
+		handlers.GetUserProfile(w, r, database.DB)
+	}).Methods("GET")
+
+	r.HandleFunc("/users/{id}", func(w http.ResponseWriter, r *http.Request) {
+		handlers.UpdateUserProfile(w, r, database.DB)
+	}).Methods("PUT")
+
+	r.HandleFunc("/users/{id}", func(w http.ResponseWriter, r *http.Request) {
+		handlers.DeleteUser(w, r, database.DB)
+	}).Methods("DELETE")
+
+	// Category routes
+	r.HandleFunc("/categories", func(w http.ResponseWriter, r *http.Request) {
+		handlers.CreateCategory(w, r, database.DB)
+	}).Methods("POST")
+
+	r.HandleFunc("/categories", func(w http.ResponseWriter, r *http.Request) {
+		handlers.GetCategories(w, r, database.DB)
+	}).Methods("GET")
+
+	r.HandleFunc("/categories/{id}", func(w http.ResponseWriter, r *http.Request) {
+		handlers.GetCategory(w, r, database.DB)
+	}).Methods("GET")
+
+	r.HandleFunc("/categories/{id}", func(w http.ResponseWriter, r *http.Request) {
+		handlers.UpdateCategory(w, r, database.DB)
+	}).Methods("PUT")
+	
+	r.HandleFunc("/categories/{id}", func(w http.ResponseWriter, r *http.Request) {
+		handlers.DeleteCategory(w, r, database.DB)
+	}).Methods("DELETE")
+
 	// Thread routes
 	r.HandleFunc("/threads", func(w http.ResponseWriter, r *http.Request) {
 		handlers.CreateThread(w, r, database.DB)
 	}).Methods("POST")
+
 	r.HandleFunc("/threads/{id}", func(w http.ResponseWriter, r *http.Request) {
 		handlers.GetThread(w, r, database.DB)
 	}).Methods("GET")
+
 	r.HandleFunc("/threads/{id}", func(w http.ResponseWriter, r *http.Request) {
 		handlers.UpdateThread(w, r, database.DB)
 	}).Methods("PUT")
+
 	r.HandleFunc("/threads/{id}", func(w http.ResponseWriter, r *http.Request) {
 		handlers.DeleteThread(w, r, database.DB)
 	}).Methods("DELETE")
@@ -35,12 +80,15 @@ func main() {
 	r.HandleFunc("/comments", func(w http.ResponseWriter, r *http.Request) {
 		handlers.CreateComment(w, r, database.DB)
 	}).Methods("POST")
+
 	r.HandleFunc("/threads/{id}/comments", func(w http.ResponseWriter, r *http.Request) {
 		handlers.GetCommentsByThread(w, r, database.DB)
 	}).Methods("GET")
+
 	r.HandleFunc("/comments/{id}", func(w http.ResponseWriter, r *http.Request) {
 		handlers.UpdateComment(w, r, database.DB)
 	}).Methods("PUT")
+
 	r.HandleFunc("/comments/{id}", func(w http.ResponseWriter, r *http.Request) {
 		handlers.DeleteComment(w, r, database.DB)
 	}).Methods("DELETE")

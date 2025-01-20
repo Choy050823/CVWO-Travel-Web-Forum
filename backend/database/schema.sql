@@ -1,6 +1,4 @@
 -- schema.sql
-CREATE USER forum_admin WITH PASSWORD 'choy050823';
-GRANT ALL PRIVILEGES ON DATABASE travel_forum TO forum_admin;
 
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,

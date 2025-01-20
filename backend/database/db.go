@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
-	"os"
+	// "os"
 
 	_ "github.com/lib/pq"
 )
@@ -37,21 +37,21 @@ func InitDB() {
 	fmt.Println("Successfully connected to the database!")
 
 	// Execute schema.sql
-	executeSchema()
+	// executeSchema()
 }
 
-func executeSchema() {
-	// Read the schema.sql file
-	schema, err := os.ReadFile("./database/schema.sql")
-	if err != nil {
-		log.Fatal("Failed to read schema.sql:", err)
-	}
+// func executeSchema() {
+// 	// Read the schema.sql file
+// 	schema, err := os.ReadFile("./database/schema.sql")
+// 	if err != nil {
+// 		log.Fatal("Failed to read schema.sql:", err)
+// 	}
 
-	// Execute the schema.sql script
-	_, err = DB.Exec(string(schema))
-	if err != nil {
-		log.Fatal("Failed to execute schema.sql:", err)
-	}
+// 	// Execute the schema.sql script
+// 	_, err = DB.Exec(string(schema))
+// 	if err != nil {
+// 		log.Fatal("Failed to execute schema.sql:", err)
+// 	}
 
-	fmt.Println("Schema executed successfully!")
-}
+// 	fmt.Println("Schema executed successfully!")
+// }
