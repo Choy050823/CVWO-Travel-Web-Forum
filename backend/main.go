@@ -54,7 +54,7 @@ func main() {
 	r.HandleFunc("/categories/{id}", func(w http.ResponseWriter, r *http.Request) {
 		handlers.UpdateCategory(w, r, database.DB)
 	}).Methods("PUT")
-	
+
 	r.HandleFunc("/categories/{id}", func(w http.ResponseWriter, r *http.Request) {
 		handlers.DeleteCategory(w, r, database.DB)
 	}).Methods("DELETE")
@@ -63,6 +63,10 @@ func main() {
 	r.HandleFunc("/threads", func(w http.ResponseWriter, r *http.Request) {
 		handlers.CreateThread(w, r, database.DB)
 	}).Methods("POST")
+
+	r.HandleFunc("/threads", func(w http.ResponseWriter, r *http.Request) {
+		handlers.GetAllThreads(w, r, database.DB)
+	}).Methods("GET")
 
 	r.HandleFunc("/threads/{id}", func(w http.ResponseWriter, r *http.Request) {
 		handlers.GetThread(w, r, database.DB)

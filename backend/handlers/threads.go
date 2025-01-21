@@ -35,6 +35,26 @@ func CreateThread(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	json.NewEncoder(w).Encode(thread)
 }
 
+// Get All Threads
+func GetAllThreads(w http.ResponseWriter, r *http.Request, db *sql.DB) {
+	var thread models.Thread
+	var err error
+	query := `
+		SELECT id, title, content, user_id, category_id, created_at
+		FROM threads`
+
+	err = db.QueryRow(query).Scan(&thread.ID, &thread.Title, &thread.Content, &thread.UserID, &thread.CategoryID, &thread.CreatedAt)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			http.Error(w, "Threads not found", http.StatusNotFound)
+		} else {
+			http.Error(w, "Database error", http.StatusInternalServerError)
+		}
+		return
+	}
+	json.NewEncoder(w).Encode(thread)
+}
+
 // GetThread retrieves a thread by ID
 func GetThread(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	vars := mux.Vars(r)
