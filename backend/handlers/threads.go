@@ -12,12 +12,18 @@ import (
 
 // CreateThread creates a new thread
 func CreateThread(w http.ResponseWriter, r *http.Request, db *sql.DB) {
+	// Get user id from jwt
+	userID := r.Context().Value("user_id").(int)
+
 	var thread models.Thread
 	err := json.NewDecoder(r.Body).Decode(&thread)
 	if err != nil {
 		http.Error(w, "Invalid request", http.StatusBadRequest)
 		return
 	}
+
+	// Set thread user id from JWT
+	thread.UserID = userID
 
 	// Insert the thread into the database
 	query := `
@@ -30,29 +36,46 @@ func CreateThread(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		print(err.Error())
 		return
 	}
-
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(thread)
 }
 
-// Get All Threads
+// GetAllThreads retrieves all threads
 func GetAllThreads(w http.ResponseWriter, r *http.Request, db *sql.DB) {
-	var thread models.Thread
-	var err error
-	query := `
+	// Query all threads from the database
+	rows, err := db.Query(`
 		SELECT id, title, content, user_id, category_id, created_at
-		FROM threads`
-
-	err = db.QueryRow(query).Scan(&thread.ID, &thread.Title, &thread.Content, &thread.UserID, &thread.CategoryID, &thread.CreatedAt)
+		FROM threads
+	`)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			http.Error(w, "Threads not found", http.StatusNotFound)
-		} else {
-			http.Error(w, "Database error", http.StatusInternalServerError)
-		}
+		http.Error(w, "Failed to fetch threads", http.StatusInternalServerError)
 		return
 	}
-	json.NewEncoder(w).Encode(thread)
+	defer rows.Close()
+
+	// Iterate through the rows and map them to Thread objects
+	var threads []models.Thread
+	for rows.Next() {
+		var thread models.Thread
+		err := rows.Scan(&thread.ID, &thread.Title, &thread.Content, &thread.UserID, &thread.CategoryID, &thread.CreatedAt)
+		if err != nil {
+			http.Error(w, "Failed to read thread data", http.StatusInternalServerError)
+			return
+		}
+		threads = append(threads, thread)
+	}
+
+	// Check for errors during iteration
+	if err = rows.Err(); err != nil {
+		http.Error(w, "Error iterating through threads", http.StatusInternalServerError)
+		return
+	}
+
+	// Return the threads as JSON
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(threads)
 }
 
 // GetThread retrieves a thread by ID
@@ -78,16 +101,78 @@ func GetThread(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		}
 		return
 	}
-
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(thread)
 }
 
-// UpdateThread updates an existing thread
+// GetMyThreads retrieves all threads created by the authenticated user
+func GetMyThreads(w http.ResponseWriter, r *http.Request, db *sql.DB) {
+	// Get user id from JWT
+	authUserID := r.Context().Value("user_id").(int)
+
+	// Query threads created by the authenticated user
+	query := `
+		SELECT id, title, content, user_id, category_id, created_at
+		FROM threads
+		WHERE user_id = $1`
+	rows, err := db.Query(query, authUserID)
+	if err != nil {
+		http.Error(w, "Failed to fetch threads", http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	// Iterate through the rows and map them to Thread objects
+	var threads []models.Thread
+	for rows.Next() {
+		var thread models.Thread
+		err := rows.Scan(&thread.ID, &thread.Title, &thread.Content, &thread.UserID, &thread.CategoryID, &thread.CreatedAt)
+		if err != nil {
+			http.Error(w, "Failed to read thread data", http.StatusInternalServerError)
+			return
+		}
+		threads = append(threads, thread)
+	}
+
+	// Check for errors during iteration
+	if err = rows.Err(); err != nil {
+		http.Error(w, "Error iterating through threads", http.StatusInternalServerError)
+		return
+	}
+
+	// Return the threads as JSON
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(threads)
+}
+
 func UpdateThread(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	vars := mux.Vars(r)
 	threadID, err := strconv.Atoi(vars["id"])
 	if err != nil {
 		http.Error(w, "Invalid thread ID", http.StatusBadRequest)
+		return
+	}
+
+	// Get user id from JWT
+	authUserID := r.Context().Value("user_id").(int)
+
+	// Fetch the existing thread to check ownership
+	var existingThread models.Thread
+	query := `SELECT user_id FROM threads WHERE id = $1`
+	err = db.QueryRow(query, threadID).Scan(&existingThread.UserID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			http.Error(w, "Thread not found", http.StatusNotFound)
+		} else {
+			http.Error(w, "Database error", http.StatusInternalServerError)
+		}
+		return
+	}
+
+	// Ensure the authenticated user can only update their own thread
+	if existingThread.UserID != authUserID {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
 
@@ -99,7 +184,7 @@ func UpdateThread(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	}
 
 	// Update the thread in the database
-	query := `
+	query = `
 		UPDATE threads
 		SET title = $1, content = $2, category_id = $3
 		WHERE id = $4`
@@ -108,12 +193,11 @@ func UpdateThread(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		http.Error(w, "Failed to update thread", http.StatusInternalServerError)
 		return
 	}
-
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(thread)
 }
 
-// DeleteThread deletes a thread by ID
 func DeleteThread(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	vars := mux.Vars(r)
 	threadID, err := strconv.Atoi(vars["id"])
@@ -122,8 +206,30 @@ func DeleteThread(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		return
 	}
 
+	// Get user id from JWT
+	authUserID := r.Context().Value("user_id").(int)
+
+	// Fetch the existing thread to check ownership
+	var existingThread models.Thread
+	query := `SELECT user_id FROM threads WHERE id = $1`
+	err = db.QueryRow(query, threadID).Scan(&existingThread.UserID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			http.Error(w, "Thread not found", http.StatusNotFound)
+		} else {
+			http.Error(w, "Database error", http.StatusInternalServerError)
+		}
+		return
+	}
+
+	// Ensure the authenticated user can only delete their own thread
+	if existingThread.UserID != authUserID {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
 	// Delete the thread from the database
-	query := `DELETE FROM threads WHERE id = $1`
+	query = `DELETE FROM threads WHERE id = $1`
 	_, err = db.Exec(query, threadID)
 	if err != nil {
 		http.Error(w, "Failed to delete thread", http.StatusInternalServerError)

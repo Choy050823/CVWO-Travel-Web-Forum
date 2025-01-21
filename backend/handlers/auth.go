@@ -5,13 +5,17 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
-	// "time"
+	"time"
 
 	"travel-forum-backend/models"
 
 	"github.com/gorilla/mux"
 	"golang.org/x/crypto/bcrypt"
+	"github.com/golang-jwt/jwt"
 )
+
+var jwtKey = []byte("5lfX8Bl4C1mZZ/ljU+BrWFoxTcxQqacwPVfloDs+5No=")
+
 
 // Register handles user registration
 func Register(w http.ResponseWriter, r *http.Request, db *sql.DB) {
@@ -45,7 +49,7 @@ func Register(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	user.Username = req.Username
 	user.Email = req.Email
 	user.Role = "user"
-
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(user)
 }
@@ -79,10 +83,32 @@ func Login(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		return
 	}
 
+	// Create JWT claims to for future login purpose (expired in 24 hrs)
+	expirationTime := time.Now().Add(24 * time.Hour)
+	claims := &models.Claims {
+		UserID: user.ID,
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: expirationTime.Unix(),
+		},
+	}
+
+	// Generate the JWT in response
+	// Signing the JWT token
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	// Get the complete signed token
+	tokenString, err := token.SignedString(jwtKey)
+	if err != nil {
+		http.Error(w, "Failed to generate token", http.StatusInternalServerError)
+		return
+	}
+
 	// Return the user (without password hash)
 	user.PasswordHash = ""
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(user)
+	json.NewEncoder(w).Encode(map[string]string {
+		"token": tokenString,
+	})
 }
 
 // GetUserProfile retrieves a user's profile
@@ -106,7 +132,7 @@ func GetUserProfile(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		}
 		return
 	}
-
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(user)
 }
@@ -117,6 +143,14 @@ func UpdateUserProfile(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	userID, err := strconv.Atoi(vars["id"])
 	if err != nil {
 		http.Error(w, "Invalid user ID", http.StatusBadRequest)
+		return
+	}
+
+	// Check auth_user is the user on the device right now
+	authUserID := r.Context().Value("user_id").(int)
+
+	if authUserID != userID {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
 
@@ -137,7 +171,7 @@ func UpdateUserProfile(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		http.Error(w, "Failed to update user", http.StatusInternalServerError)
 		return
 	}
-
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(req)
 }
@@ -148,6 +182,14 @@ func DeleteUser(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	userID, err := strconv.Atoi(vars["id"])
 	if err != nil {
 		http.Error(w, "Invalid user ID", http.StatusBadRequest)
+		return
+	}
+
+	// Check auth_user is the user on the device right now
+	authUserID := r.Context().Value("user_id").(int)
+
+	if authUserID != userID {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
 

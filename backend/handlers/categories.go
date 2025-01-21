@@ -29,7 +29,7 @@ func CreateCategory(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		http.Error(w, "Failed to create category", http.StatusInternalServerError)
 		return
 	}
-
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(category)
 }
@@ -53,7 +53,7 @@ func GetCategories(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		}
 		categories = append(categories, category)
 	}
-
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(categories)
 }
@@ -78,7 +78,7 @@ func GetCategory(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		}
 		return
 	}
-
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(category)
 }
@@ -109,7 +109,7 @@ func UpdateCategory(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		http.Error(w, "Failed to update category", http.StatusInternalServerError)
 		return
 	}
-
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(category)
 }
