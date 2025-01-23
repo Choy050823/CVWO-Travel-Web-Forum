@@ -7,11 +7,12 @@ import (
 	"strconv"
 	"time"
 
+	"travel-forum-backend/cache"
 	"travel-forum-backend/models"
 
+	"github.com/golang-jwt/jwt"
 	"github.com/gorilla/mux"
 	"golang.org/x/crypto/bcrypt"
-	"github.com/golang-jwt/jwt"
 )
 
 var jwtKey = []byte("5lfX8Bl4C1mZZ/ljU+BrWFoxTcxQqacwPVfloDs+5No=")
@@ -102,6 +103,9 @@ func Login(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		return
 	}
 
+	// Cache the user credential
+	cache.CacheUser((string) (user.ID), user)
+
 	// Return the user (without password hash)
 	user.PasswordHash = ""
 	w.Header().Set("Content-Type", "application/json")
@@ -171,6 +175,15 @@ func UpdateUserProfile(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		http.Error(w, "Failed to update user", http.StatusInternalServerError)
 		return
 	}
+
+	updatedUser := models.User {
+		ID: authUserID,
+		Username: req.Username,
+		Email: req.Email,
+	}
+	// Cache the new user
+	cache.CacheUser(strconv.Itoa(authUserID), updatedUser)
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(req)
@@ -200,6 +213,9 @@ func DeleteUser(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		http.Error(w, "Failed to delete user", http.StatusInternalServerError)
 		return
 	}
+
+	// Remove the user from the cache
+    cache.DeleteCachedUser((string) (userID))
 
 	w.WriteHeader(http.StatusNoContent)
 }
