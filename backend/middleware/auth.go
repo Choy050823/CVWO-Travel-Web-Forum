@@ -2,7 +2,9 @@ package middleware
 
 import (
 	"context"
+	"log"
 	"net/http"
+	"os"
 	"strings"
 
 	"travel-forum-backend/models"
@@ -10,15 +12,27 @@ import (
 	"github.com/golang-jwt/jwt"
 )
 
-// Must set into env later
-var jwtKey = []byte("5lfX8Bl4C1mZZ/ljU+BrWFoxTcxQqacwPVfloDs+5No=")
+var jwtKey = []byte(os.Getenv("5lfX8Bl4C1mZZ/ljU+BrWFoxTcxQqacwPVfloDs+5No="))
 
-// validates the JWT and check if user is authenticated
 func AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		defer func() {
+			if err := recover(); err != nil {
+				log.Printf("Panic in AuthMiddleware: %v", err)
+				http.Error(w, "Internal server error", http.StatusInternalServerError)
+			}
+		}()
+
+		if len(jwtKey) == 0 {
+			log.Println("JWT secret key not set")
+			http.Error(w, "Internal server error", http.StatusInternalServerError)
+			return
+		}
+
 		// Get token from the Authorization header
 		authHeader := r.Header.Get("Authorization")
 		if authHeader == "" {
+			log.Println("Authorization header missing")
 			http.Error(w, "Authorization header missing", http.StatusUnauthorized)
 			return
 		}
@@ -26,6 +40,7 @@ func AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 		// Extract token from header
 		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
 		if tokenString == "" {
+			log.Println("Invalid token format")
 			http.Error(w, "Invalid token format", http.StatusUnauthorized)
 			return
 		}
@@ -35,16 +50,41 @@ func AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 		token, err := jwt.ParseWithClaims(tokenString, claims, func(t *jwt.Token) (interface{}, error) {
 			return jwtKey, nil
 		})
-		if err != nil || !token.Valid {
+		if err != nil {
+			if err == jwt.ErrSignatureInvalid {
+				log.Println("Invalid token signature")
+				http.Error(w, "Invalid token signature", http.StatusUnauthorized)
+				return
+			}
+			if ve, ok := err.(*jwt.ValidationError); ok {
+				if ve.Errors&jwt.ValidationErrorExpired != 0 {
+					log.Println("Token expired")
+					http.Error(w, "Token expired", http.StatusUnauthorized)
+					return
+				}
+			}
+			log.Printf("Invalid token: %v", err)
+			http.Error(w, "Invalid token", http.StatusUnauthorized)
+			return
+		}
+		if !token.Valid {
+			log.Println("Invalid token")
 			http.Error(w, "Invalid token", http.StatusUnauthorized)
 			return
 		}
 
-		// Add the authorized user id to the request context (authenticates the request)
+		// Validate token claims
+		if claims.UserID == 0 {
+			log.Println("Invalid token claims: UserID missing")
+			http.Error(w, "Invalid token claims", http.StatusUnauthorized)
+			return
+		}
+
+		// Add the authorized user id to the request context
 		ctx := context.WithValue(r.Context(), "user_id", claims.UserID)
 		r = r.WithContext(ctx)
 
-		// Calls the next middleware or
+		// Call the next middleware or handler
 		next(w, r)
 	}
 }

@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"strconv"
 	"time"
+	"regexp"
+	"log"
 
 	"travel-forum-backend/cache"
 	"travel-forum-backend/models"
@@ -17,19 +19,60 @@ import (
 
 var jwtKey = []byte("5lfX8Bl4C1mZZ/ljU+BrWFoxTcxQqacwPVfloDs+5No=")
 
+func isValidEmail(email string) bool {
+    emailRegex := `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
+    return regexp.MustCompile(emailRegex).MatchString(email)
+}
 
 // Register handles user registration
 func Register(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	var req models.RegisterRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
+		log.Printf("Error decoding request body: %v", err)
 		http.Error(w, "Invalid request", http.StatusBadRequest)
+		return
+	}
+
+	// Validate email
+	if !isValidEmail(req.Email) {
+		http.Error(w, "Invalid email format", http.StatusBadRequest)
+		return
+	}
+
+	// Validate password strength
+	if len(req.Password) < 8 {
+		http.Error(w, "Password must be at least 8 characters long", http.StatusBadRequest)
+		return
+	}
+
+	// Check if email already exists
+	var existingUser models.User
+	err = db.QueryRow(`SELECT id FROM users WHERE email = $1`, req.Email).Scan(&existingUser.ID)
+	if err == nil {
+		http.Error(w, "Email already exists", http.StatusConflict)
+		return
+	} else if err != sql.ErrNoRows {
+		log.Printf("Database error: %v", err)
+		http.Error(w, "Database error", http.StatusInternalServerError)
+		return
+	}
+
+	// Check if username already exists
+	err = db.QueryRow(`SELECT id FROM users WHERE username = $1`, req.Username).Scan(&existingUser.ID)
+	if err == nil {
+		http.Error(w, "Username already exists", http.StatusConflict)
+		return
+	} else if err != sql.ErrNoRows {
+		log.Printf("Database error: %v", err)
+		http.Error(w, "Database error", http.StatusInternalServerError)
 		return
 	}
 
 	// Hash the password
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
+		log.Printf("Error hashing password: %v", err)
 		http.Error(w, "Failed to hash password", http.StatusInternalServerError)
 		return
 	}
@@ -42,6 +85,7 @@ func Register(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	var user models.User
 	err = db.QueryRow(query, req.Username, req.Email, hashedPassword, "user").Scan(&user.ID, &user.CreatedAt)
 	if err != nil {
+		log.Printf("Database error: %v", err)
 		http.Error(w, "Failed to create user", http.StatusInternalServerError)
 		return
 	}
