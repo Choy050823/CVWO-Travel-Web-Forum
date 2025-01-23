@@ -1,44 +1,27 @@
-import React from "react";
-// import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from "react";
 import { Thread } from "../models/models";
 import Navbar from "../components/Navbar";
+import BASE_URL from "../config";
 
 const HomePage: React.FC = () => {
-  const threads: Thread[] = [
-    {
-      id: 1,
-      title: "Thread 1",
-      content: "Content of thread 1",
-      postedBy: 0,
-      categories: [],
-      attachedImages: [],
-      createdAt: new Date(),
-      likes: 0,
-      lastActive: "",
-    },
-    {
-      id: 1,
-      title: "Thread 1",
-      content: "Content of thread 1",
-      postedBy: 0,
-      categories: [],
-      attachedImages: [],
-      createdAt: new Date(),
-      likes: 0,
-      lastActive: "",
-    },
-    {
-      id: 1,
-      title: "Thread 1",
-      content: "Content of thread 1",
-      postedBy: 0,
-      categories: [],
-      attachedImages: [],
-      createdAt: new Date(),
-      likes: 0,
-      lastActive: "",
-    },
-  ];
+  const [threads, setThreads] = useState<Thread[]>([]);
+
+  useEffect(() => {
+    const fetchThreads = async () => {
+      try {
+        const response = await fetch(`${BASE_URL}/api/threads`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch threads");
+        }
+        const data = await response.json();
+        setThreads(data);
+      } catch (error) {
+        console.error("Error fetching threads:", error);
+      }
+    };
+
+    fetchThreads();
+  }, []);
 
   return (
     <div>
@@ -48,8 +31,7 @@ const HomePage: React.FC = () => {
         {threads.map((thread) => (
           <li key={thread.id}>
             <h2>{thread.title}</h2>
-            {/* Find when is it last active to see whether it is outdated */}
-            <p>Last Active: {Date.now() - thread.createdAt.getTime()}</p>
+            <p>Last Active: {new Date(thread.createdAt).toLocaleString()}</p>
             <p>{thread.content}</p>
           </li>
         ))}

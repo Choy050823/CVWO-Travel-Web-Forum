@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { User } from "../models/models";
+import BASE_URL from "../config";
 
 const SignUpPage: React.FC = () => {
   const [username, setUsername] = useState<string>("");
@@ -10,18 +10,24 @@ const SignUpPage: React.FC = () => {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    const newUser: User = {
-      id: Math.floor(Math.random() * 1000),
-      username: username,
-      email: email,
-      password: password,
-      role: "user",
-      participationScore: 0,
-    };
-    // Add your sign up logic here, e.g., API call to register the user
-    console.log(newUser);
-    // Assuming the sign up is successful, navigate to the login page
-    navigate("/login");
+
+    try {
+      const response = await fetch(`${BASE_URL}/api/register`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username, email, password }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Sign up failed");
+      }
+
+      navigate("/login"); // Redirect to login page
+    } catch (error) {
+      console.error("Error during sign up:", error);
+    }
   };
 
   return (

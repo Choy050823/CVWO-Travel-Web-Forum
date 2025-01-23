@@ -12,19 +12,35 @@ import SearchPage from "./pages/SearchPage";
 import NotificationsPage from "./pages/NotificationsPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminRoute from "./components/AdminRoute";
+import { useEffect, useState } from "react";
+import BASE_URL from "./config";
 
 const App = () => {
-  const loginUser: User = {
-    id: 1,
-    username: "john_doe",
-    password: "",
-    profilePicture: "",
-    email: "john_doe@gmail.com",
-    bio: "Hello, I'm John Doe",
-    role: "admin",
-    threadsCreated: [],
-    participationScore: 0,
-  };
+  const [user, setUser] = useState<User | null>(null);
+
+  // Fetch user data after login
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const token = localStorage.getItem("token");
+      if (token) {
+        try {
+          const response = await fetch(`${BASE_URL}/api/users/me`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+          if (response.ok) {
+            const userData = await response.json();
+            setUser(userData);
+          }
+        } catch (error) {
+          console.error("Error fetching user data:", error);
+        }
+      }
+    };
+
+    fetchUserData();
+  }, []);
 
   return (
     <BrowserRouter>
@@ -40,7 +56,7 @@ const App = () => {
         <Route
           path="/thread/:id"
           element={
-            <ProtectedRoute user={loginUser}>
+            <ProtectedRoute user={user}>
               <ThreadDetailsPage />
             </ProtectedRoute>
           }
@@ -48,15 +64,15 @@ const App = () => {
         <Route
           path="/user/:id"
           element={
-            <ProtectedRoute user={loginUser}>
-              <UserProfilePage user={loginUser} />
+            <ProtectedRoute user={user}>
+              <UserProfilePage user={user!} />
             </ProtectedRoute>
           }
         />
         <Route
           path="/create"
           element={
-            <ProtectedRoute user={loginUser}>
+            <ProtectedRoute user={user}>
               <CreateEditThreadPage />
             </ProtectedRoute>
           }
@@ -64,7 +80,7 @@ const App = () => {
         <Route
           path="/edit/:id"
           element={
-            <ProtectedRoute user={loginUser}>
+            <ProtectedRoute user={user}>
               <CreateEditThreadPage />
             </ProtectedRoute>
           }
@@ -72,8 +88,8 @@ const App = () => {
         <Route
           path="/notifications"
           element={
-            <ProtectedRoute user={loginUser}>
-              <NotificationsPage user={loginUser} />
+            <ProtectedRoute user={user}>
+              <NotificationsPage user={user!} />
             </ProtectedRoute>
           }
         />
@@ -82,7 +98,7 @@ const App = () => {
         <Route
           path="/admin"
           element={
-            <AdminRoute user={loginUser}>
+            <AdminRoute user={user}>
               <AdminDashboardPage />
             </AdminRoute>
           }

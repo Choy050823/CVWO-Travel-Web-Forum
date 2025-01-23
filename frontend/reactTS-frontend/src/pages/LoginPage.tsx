@@ -1,18 +1,35 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import BASE_URL from "../config";
 
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const navigate = useNavigate();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle login logic here
-    // remember to get all the necessary data from the backend and store locally
 
-    // Assuming login is successful
-    navigate("/");
+    try {
+      const response = await fetch(`${BASE_URL}/api/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Login failed");
+      }
+
+      const data = await response.json();
+      localStorage.setItem("token", data.token); // Store the token
+      console.log("Login Successful!");
+      navigate("/"); // Redirect to home page
+    } catch (error) {
+      console.error("Error during login:", error);
+    }
   };
 
   return (
