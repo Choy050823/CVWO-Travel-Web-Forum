@@ -11,7 +11,6 @@ import (
 
 	"travel-forum-backend/cache"
 	"travel-forum-backend/models"
-
 	"github.com/golang-jwt/jwt"
 	"github.com/gorilla/mux"
 	"golang.org/x/crypto/bcrypt"
