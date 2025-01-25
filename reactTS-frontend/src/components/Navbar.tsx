@@ -1,14 +1,27 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { User } from "../models/models";
 
-const Navbar: React.FC<{ user: User | null }> = ({ user }) => {
+const Navbar: React.FC = () => {
   const navigate = useNavigate();
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
+
   const isLogin: boolean = user !== null;
   const isAdmin: boolean = isLogin && user!.role === "admin";
 
   const handleLogOut = () => {
-    // Handle Log Out here
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    localStorage.removeItem("name");
+    setUser(null);
+    navigate("/");
   };
 
   return (
@@ -22,9 +35,11 @@ const Navbar: React.FC<{ user: User | null }> = ({ user }) => {
             Browse specific threads!
           </button>
         </li>
-        <li>
-          {isAdmin && <button onClick={() => navigate("/admin")}>Admin</button>}
-        </li>
+        {isAdmin && (
+          <li>
+            <button onClick={() => navigate("/admin")}>Admin</button>
+          </li>
+        )}
         {isLogin ? (
           <div>
             <li>

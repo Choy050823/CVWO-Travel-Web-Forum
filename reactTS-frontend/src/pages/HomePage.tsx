@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { Thread } from "../models/models";
+import { Thread, User } from "../models/models";
 import Navbar from "../components/Navbar";
 import BASE_URL from "../config";
 
-const HomePage: React.FC = () => {
+const HomePage: React.FC<{ user: User | null }> = () => {
   const [threads, setThreads] = useState<Thread[]>([]);
 
   useEffect(() => {
@@ -25,7 +25,7 @@ const HomePage: React.FC = () => {
 
   return (
     <div>
-      <Navbar user={null} />
+      <Navbar />
       <h1>Threads</h1>
       <ul>
         {threads.map((thread) => (

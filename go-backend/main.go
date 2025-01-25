@@ -6,8 +6,9 @@ import (
 	"travel-forum-backend/database"
 	"travel-forum-backend/handlers"
 	"travel-forum-backend/middleware"
-	"github.com/rs/cors"
+
 	"github.com/gorilla/mux"
+	"github.com/rs/cors"
 )
 
 // func enableCORS(next http.Handler) http.Handler {
@@ -66,6 +67,10 @@ func main() {
 		handlers.GetUserProfile(w, r, database.DB)
 	})).Methods("GET")
 
+	r.HandleFunc("/api/me", middleware.AuthMiddleware(func(w http.ResponseWriter, r *http.Request) {
+		handlers.GetCurrentUser(w, r, database.DB)
+	})).Methods("GET")
+
 	r.HandleFunc("/api/users/{id}", middleware.AuthMiddleware(func(w http.ResponseWriter, r *http.Request) {
 		handlers.UpdateUserProfile(w, r, database.DB)
 	})).Methods("PUT")
@@ -119,7 +124,7 @@ func main() {
 
 	// Configure CORS
 	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:5174"}, // Allow your React frontend origin
+		AllowedOrigins:   []string{"http://localhost:5173"}, // Allow your React frontend origin
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Content-Type", "Authorization"},
 		AllowCredentials: true,

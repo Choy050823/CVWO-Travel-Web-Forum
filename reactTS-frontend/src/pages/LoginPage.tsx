@@ -25,6 +25,22 @@ const LoginPage: React.FC = () => {
 
       const data = await response.json();
       localStorage.setItem("token", data.token); // Store the token
+
+      // Fetch user details after successful login
+      const userResponse = await fetch(`${BASE_URL}/api/me`, {
+        headers: {
+          Authorization: `Bearer ${data.token}`,
+        },
+      });
+
+      if (!userResponse.ok) {
+        throw new Error("Failed to fetch user details");
+      }
+
+      const user = await userResponse.json();
+      localStorage.setItem("user", JSON.stringify(user)); // Store user details
+      console.log("USER: ", localStorage.getItem("user"));
+
       console.log("Login Successful!");
       navigate("/"); // Redirect to home page
     } catch (error) {

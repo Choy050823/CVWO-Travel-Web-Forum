@@ -8,6 +8,7 @@ interface UserProfilePageProps {
 const UserProfilePage: React.FC<UserProfilePageProps> = ({ user }) => {
   return (
     <div>
+      <h1>USER PROFILE</h1>
       <img src={user.profilePicture || ""} alt="Profile" />
       <ul>
         <li>Username: {user.username}</li>

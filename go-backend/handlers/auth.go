@@ -158,6 +158,32 @@ func Login(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	})
 }
 
+func GetCurrentUser(w http.ResponseWriter, r *http.Request, db *sql.DB) {
+    // Extract the user ID from the JWT token
+    claims, ok := r.Context().Value("claims").(*models.Claims)
+    if !ok {
+        http.Error(w, "Invalid token claims", http.StatusUnauthorized)
+        return
+    }
+
+    // Fetch the user from the database
+    var user models.User
+    query := `SELECT id, username, email, role FROM users WHERE id = $1`
+    err := db.QueryRow(query, claims.UserID).Scan(&user.ID, &user.Username, &user.Email, &user.Role)
+    if err != nil {
+        if err == sql.ErrNoRows {
+            http.Error(w, "User not found", http.StatusNotFound)
+        } else {
+            http.Error(w, "Database error", http.StatusInternalServerError)
+        }
+        return
+    }
+
+    // Return the user data
+    w.Header().Set("Content-Type", "application/json")
+    json.NewEncoder(w).Encode(user)
+}
+
 // GetUserProfile retrieves a user's profile
 func GetUserProfile(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	vars := mux.Vars(r)

@@ -22,9 +22,11 @@ const App = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       const token = localStorage.getItem("token");
+      console.log(token);
       if (token) {
         try {
-          const response = await fetch(`${BASE_URL}/api/users/me`, {
+          // how to get user with token only?
+          const response = await fetch(`${BASE_URL}/api/me`, {
             headers: {
               Authorization: `Bearer ${token}`,
             },
@@ -46,7 +48,7 @@ const App = () => {
     <BrowserRouter>
       <Routes>
         {/* General Users */}
-        <Route path="/" element={<HomePage />} />
+        <Route path="/" element={<HomePage user={user} />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignUpPage />} />
         <Route path="/search" element={<SearchPage />} />

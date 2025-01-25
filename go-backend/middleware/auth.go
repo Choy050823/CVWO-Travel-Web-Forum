@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 	"net/http"
-	"os"
+	// "os"
 	"strings"
 
 	"travel-forum-backend/models"
@@ -12,7 +12,8 @@ import (
 	"github.com/golang-jwt/jwt"
 )
 
-var jwtKey = []byte(os.Getenv("5lfX8Bl4C1mZZ/ljU+BrWFoxTcxQqacwPVfloDs+5No="))
+// var jwtKey = []byte(os.Getenv("JWT_SECRET_KEY"))
+var jwtKey = []byte("5lfX8Bl4C1mZZ/ljU+BrWFoxTcxQqacwPVfloDs+5No=")
 
 func AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -81,8 +82,11 @@ func AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 		}
 
 		// Add the authorized user id to the request context
-		ctx := context.WithValue(r.Context(), "user_id", claims.UserID)
+		ctx := context.WithValue(r.Context(), "claims", claims)
 		r = r.WithContext(ctx)
+
+		log.Printf("Token: %s", tokenString)
+		log.Printf("Claims: %+v", claims)
 
 		// Call the next middleware or handler
 		next(w, r)
