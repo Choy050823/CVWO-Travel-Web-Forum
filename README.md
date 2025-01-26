@@ -21,7 +21,7 @@ Ensure you have the following installed on your machine:
 
 ```bash
 git clone https://github.com/Choy050823/CVWO-Travel-Web-Forum.git
-cd <CVWO-Travel-Web-Forum>
+cd CVWO-Travel-Web-Forum
 ```
 
 ### 2. Install Dependencies
