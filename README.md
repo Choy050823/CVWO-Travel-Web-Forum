@@ -61,7 +61,7 @@ npm install
 2. Create a new database:
 
 ```sql
-CREATE DATABASE project_db;
+CREATE DATABASE CVWO_Travel_Web_Forum;
 ```
 
 3. (Optional) Create a dedicated user:
