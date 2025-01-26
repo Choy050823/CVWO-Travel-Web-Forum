@@ -23,6 +23,7 @@ const App = () => {
           {/* Wrap with UserProvider */}
           <ThreadProvider>
             <Navbar />
+
             <Routes>
               {/* General Users */}
               <Route path="/" element={<HomePage />} />

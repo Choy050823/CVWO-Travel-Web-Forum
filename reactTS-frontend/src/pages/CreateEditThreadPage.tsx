@@ -55,7 +55,7 @@ const CreateEditThreadPage: React.FC = () => {
         title,
         content,
         attachedImages: imageUrls,
-        postedBy: user?.id || 1,
+        postedBy: thread?.userId || user?.id || -1,
         categoryId: thread?.categoryId || 1, // Assuming a default category ID of 1
         createdAt: thread?.createdAt || new Date(),
         likes: thread?.likes || 0,
@@ -79,12 +79,22 @@ const CreateEditThreadPage: React.FC = () => {
     const formData = new FormData();
     images.forEach((image) => formData.append("images", image));
 
+    const token = localStorage.getItem("token");
+    if (!token) {
+      throw new Error("No authentication token found");
+    }
+
     const response = await fetch(`${BASE_URL}/api/upload-images`, {
       method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
       body: formData,
     });
 
     if (!response.ok) {
+      const errorText = await response.text(); // Get detailed error from backend
+      console.error("Server response:", errorText);
       throw new Error("Failed to upload images");
     }
 

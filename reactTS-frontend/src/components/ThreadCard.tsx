@@ -4,6 +4,7 @@ import { Thread } from "../models/models";
 import { FaBookmark, FaEdit, FaTrash } from "react-icons/fa";
 import { useUser } from "../context/UserContext";
 import { useAuth } from "../context/AuthContext"; // Import useAuth to get the current user
+import { useThreads } from "../context/ThreadContext";
 
 interface ThreadCardProps {
   thread: Thread;
@@ -19,26 +20,31 @@ const ThreadCard: React.FC<ThreadCardProps> = ({
   const navigate = useNavigate();
   const { fetchUserDetails } = useUser();
   const { user } = useAuth(); // Get the current user from AuthContext
+  const { fetchThreads } = useThreads();
   const [postedBy, setPostedBy] = React.useState<string>("Unknown User"); // Local state for user details
-
 
   React.useEffect(() => {
     const fetchUser = async () => {
       try {
-        const user = await fetchUserDetails(thread.postedBy); // Fetch user details
-        if (user) {
-          setPostedBy(user.username); // Update local state
+        console.log("Current thread: ", thread.postedBy);
+        if (thread.postedBy == undefined) {
+          await fetchThreads();
+        }
+        const fetchedUser = await fetchUserDetails(thread.postedBy); // Fetch user details
+        if (fetchedUser) {
+          setPostedBy(fetchedUser.username); // Update local state
         }
       } catch (error) {
         console.error("Error fetching user details:", error);
       }
     };
-
+    console.log("changing user");
+    console.log("Curernt User ID: ", user?.id);
     fetchUser();
   }, [thread.postedBy, fetchUserDetails]);
 
   // Check if the thread belongs to the current user
-  const isCurrentUserThread = user?.id === thread.postedBy;
+  var isCurrentUserThread: Boolean = user?.id === thread.postedBy;
 
   return (
     <div

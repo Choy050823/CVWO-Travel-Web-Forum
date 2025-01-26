@@ -15,27 +15,32 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
 
   // Fetch user details by ID
   const fetchUserDetails = async (userId: number): Promise<User | null> => {
+    if (!userId) {
+      console.warn(
+        "fetchUserDetails called with an undefined or invalid userId"
+      );
+      return null;
+    }
+
     try {
       // Check cache first
       if (userCache.has(userId)) {
+        console.log(`Returning cached user for userId: ${userId}`);
         return userCache.get(userId)!;
       }
 
+      console.log(`Fetching user details from API for userId: ${userId}`);
       const token = localStorage.getItem("token");
-
-      // Use the public endpoint if the user is not authenticated
       const url = token
-        ? `${BASE_URL}/api/users/${userId}` // Authenticated endpoint
-        : `${BASE_URL}/api/public/users/${userId}`; // Public endpoint
+        ? `${BASE_URL}/api/users/${userId}`
+        : `${BASE_URL}/api/public/users/${userId}`;
 
       const response = await fetch(url, {
-        headers: token
-          ? { Authorization: `Bearer ${token}` } // Include token if authenticated
-          : {}, // No headers for public endpoint
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
 
       if (!response.ok) {
-        throw new Error("Failed to fetch user details");
+        throw new Error(`Failed to fetch user details for userId: ${userId}`);
       }
 
       const data = await response.json();
