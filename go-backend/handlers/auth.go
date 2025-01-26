@@ -3,14 +3,15 @@ package handlers
 import (
 	"database/sql"
 	"encoding/json"
+	"log"
 	"net/http"
+	"regexp"
 	"strconv"
 	"time"
-	"regexp"
-	"log"
 
 	"travel-forum-backend/cache"
 	"travel-forum-backend/models"
+
 	"github.com/golang-jwt/jwt"
 	"github.com/gorilla/mux"
 	"golang.org/x/crypto/bcrypt"
@@ -19,8 +20,8 @@ import (
 var jwtKey = []byte("5lfX8Bl4C1mZZ/ljU+BrWFoxTcxQqacwPVfloDs+5No=")
 
 func isValidEmail(email string) bool {
-    emailRegex := `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
-    return regexp.MustCompile(emailRegex).MatchString(email)
+	emailRegex := `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
+	return regexp.MustCompile(emailRegex).MatchString(email)
 }
 
 // Register handles user registration
@@ -98,7 +99,6 @@ func Register(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	json.NewEncoder(w).Encode(user)
 }
 
-// Login handles user login
 func Login(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	var req models.LoginRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
@@ -127,19 +127,17 @@ func Login(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		return
 	}
 
-	// Create JWT claims to for future login purpose (expired in 24 hrs)
+	// Create JWT claims
 	expirationTime := time.Now().Add(24 * time.Hour)
-	claims := &models.Claims {
+	claims := &models.Claims{
 		UserID: user.ID,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expirationTime.Unix(),
 		},
 	}
 
-	// Generate the JWT in response
-	// Signing the JWT token
+	// Generate the JWT token
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	// Get the complete signed token
 	tokenString, err := token.SignedString(jwtKey)
 	if err != nil {
 		http.Error(w, "Failed to generate token", http.StatusInternalServerError)
@@ -147,41 +145,47 @@ func Login(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	}
 
 	// Cache the user credential
-	cache.CacheUser((string) (user.ID), user)
+	cache.CacheUser(strconv.Itoa(user.ID), user)
 
-	// Return the user (without password hash)
-	user.PasswordHash = ""
+	// Return the token
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]string {
+	json.NewEncoder(w).Encode(map[string]string{
 		"token": tokenString,
 	})
 }
 
 func GetCurrentUser(w http.ResponseWriter, r *http.Request, db *sql.DB) {
-    // Extract the user ID from the JWT token
-    claims, ok := r.Context().Value("claims").(*models.Claims)
-    if !ok {
-        http.Error(w, "Invalid token claims", http.StatusUnauthorized)
-        return
-    }
+	// Extract the claims from the request context
+	claims, ok := r.Context().Value("claims").(*models.Claims)
+	if !ok {
+		log.Println("Invalid token claims in GetCurrentUser")
+		http.Error(w, "Invalid token claims", http.StatusUnauthorized)
+		return
+	}
 
-    // Fetch the user from the database
-    var user models.User
-    query := `SELECT id, username, email, role FROM users WHERE id = $1`
-    err := db.QueryRow(query, claims.UserID).Scan(&user.ID, &user.Username, &user.Email, &user.Role)
-    if err != nil {
-        if err == sql.ErrNoRows {
-            http.Error(w, "User not found", http.StatusNotFound)
-        } else {
-            http.Error(w, "Database error", http.StatusInternalServerError)
-        }
-        return
-    }
+	log.Printf("Fetching user details for UserID: %d", claims.UserID)
 
-    // Return the user data
-    w.Header().Set("Content-Type", "application/json")
-    json.NewEncoder(w).Encode(user)
+	// Fetch the user from the database
+	var user models.User
+	query := `SELECT id, username, email, role FROM users WHERE id = $1`
+	err := db.QueryRow(query, claims.UserID).Scan(&user.ID, &user.Username, &user.Email, &user.Role)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			log.Printf("User not found for UserID: %d", claims.UserID)
+			http.Error(w, "User not found", http.StatusNotFound)
+		} else {
+			log.Printf("Database error in GetCurrentUser: %v", err)
+			http.Error(w, "Database error", http.StatusInternalServerError)
+		}
+		return
+	}
+
+	log.Printf("User details fetched successfully: %+v", user)
+
+	// Return the user data
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(user)
 }
 
 // GetUserProfile retrieves a user's profile
@@ -245,10 +249,10 @@ func UpdateUserProfile(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		return
 	}
 
-	updatedUser := models.User {
-		ID: authUserID,
+	updatedUser := models.User{
+		ID:       authUserID,
 		Username: req.Username,
-		Email: req.Email,
+		Email:    req.Email,
 	}
 	// Cache the new user
 	cache.CacheUser(strconv.Itoa(authUserID), updatedUser)
@@ -284,7 +288,7 @@ func DeleteUser(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	}
 
 	// Remove the user from the cache
-    cache.DeleteCachedUser((string) (userID))
+	cache.DeleteCachedUser((string)(userID))
 
 	w.WriteHeader(http.StatusNoContent)
 }

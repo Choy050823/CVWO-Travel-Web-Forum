@@ -16,9 +16,9 @@ export interface Thread {
   id: number;
   title: string;
   content: string;
-  attachedImages: React.ImgHTMLAttributes<string>[];
+  attachedImages?: string[];
   postedBy: number;
-  categories: Category[];
+  categoryId: number; // Single category ID
   createdAt: Date;
   likes: number;
   lastActive: string;
@@ -28,7 +28,7 @@ export interface Thread {
 export interface Comment {
   id: number;
   content: string;
-  attachedImages: React.ImgHTMLAttributes<string>[];
+  attachedImages: string[];
   //   posted by which user
   postedBy: number;
   threadId: number;

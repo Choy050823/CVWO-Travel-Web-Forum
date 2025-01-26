@@ -1,10 +1,9 @@
 import { Navigate } from "react-router-dom";
-import { User } from "../models/models";
+import { useAuth } from "../context/AuthContext";
 
-const ProtectedRoute: React.FC<{
-  user: User | null;
-  children: JSX.Element;
-}> = ({ user, children }) => {
+const ProtectedRoute: React.FC<{ children: JSX.Element }> = ({ children }) => {
+  const { user } = useAuth();
+
   if (!user) {
     return <Navigate to="/" />;
   }

@@ -6,8 +6,9 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/gorilla/mux"
 	"travel-forum-backend/models"
+
+	"github.com/gorilla/mux"
 )
 
 // CreateThread creates a new thread
@@ -25,12 +26,31 @@ func CreateThread(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	// Set thread user id from JWT
 	thread.UserID = userID
 
+	// Validate category_id
+	var categoryExists bool
+	err = db.QueryRow("SELECT EXISTS(SELECT 1 FROM categories WHERE id = $1)", thread.CategoryID).Scan(&categoryExists)
+	if err != nil {
+		http.Error(w, "Database error", http.StatusInternalServerError)
+		return
+	}
+	if !categoryExists {
+		http.Error(w, "Invalid category ID", http.StatusBadRequest)
+		return
+	}
+
 	// Insert the thread into the database
+	// Update SQL query to include attached_images
 	query := `
-		INSERT INTO threads (title, content, user_id, category_id)
-		VALUES ($1, $2, $3, $4)
+		INSERT INTO threads (title, content, user_id, category_id, attached_images)
+		VALUES ($1, $2, $3, $4, $5)
 		RETURNING id, created_at`
-	err = db.QueryRow(query, thread.Title, thread.Content, thread.UserID, thread.CategoryID).Scan(&thread.ID, &thread.CreatedAt)
+	err = db.QueryRow(query,
+		thread.Title,
+		thread.Content,
+		thread.UserID,
+		thread.CategoryID,
+		thread.AttachedImages,
+	).Scan(&thread.ID, &thread.CreatedAt)
 	if err != nil {
 		http.Error(w, "Failed to create thread", http.StatusInternalServerError)
 		print(err.Error())
@@ -43,22 +63,27 @@ func CreateThread(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 
 // GetAllThreads retrieves all threads
 func GetAllThreads(w http.ResponseWriter, r *http.Request, db *sql.DB) {
-	// Query all threads from the database
 	rows, err := db.Query(`
-		SELECT id, title, content, user_id, category_id, created_at
-		FROM threads
-	`)
+    SELECT id, title, content, user_id, category_id, created_at
+    FROM threads
+  `)
 	if err != nil {
 		http.Error(w, "Failed to fetch threads", http.StatusInternalServerError)
 		return
 	}
 	defer rows.Close()
 
-	// Iterate through the rows and map them to Thread objects
 	var threads []models.Thread
 	for rows.Next() {
 		var thread models.Thread
-		err := rows.Scan(&thread.ID, &thread.Title, &thread.Content, &thread.UserID, &thread.CategoryID, &thread.CreatedAt)
+		err := rows.Scan(
+			&thread.ID,
+			&thread.Title,
+			&thread.Content,
+			&thread.UserID,
+			&thread.CategoryID, // Ensure this matches the database column name
+			&thread.CreatedAt,
+		)
 		if err != nil {
 			http.Error(w, "Failed to read thread data", http.StatusInternalServerError)
 			return
@@ -66,13 +91,11 @@ func GetAllThreads(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		threads = append(threads, thread)
 	}
 
-	// Check for errors during iteration
 	if err = rows.Err(); err != nil {
 		http.Error(w, "Error iterating through threads", http.StatusInternalServerError)
 		return
 	}
 
-	// Return the threads as JSON
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(threads)
@@ -183,12 +206,30 @@ func UpdateThread(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		return
 	}
 
+	// Validate category_id
+	var categoryExists bool
+	err = db.QueryRow("SELECT EXISTS(SELECT 1 FROM categories WHERE id = $1)", thread.CategoryID).Scan(&categoryExists)
+	if err != nil {
+		http.Error(w, "Database error", http.StatusInternalServerError)
+		return
+	}
+	if !categoryExists {
+		http.Error(w, "Invalid category ID", http.StatusBadRequest)
+		return
+	}
+
 	// Update the thread in the database
 	query = `
 		UPDATE threads
-		SET title = $1, content = $2, category_id = $3
-		WHERE id = $4`
-	_, err = db.Exec(query, thread.Title, thread.Content, thread.CategoryID, threadID)
+		SET title = $1, content = $2, category_id = $3, attached_images = $4
+		WHERE id = $5`
+	_, err = db.Exec(query,
+		thread.Title,
+		thread.Content,
+		thread.CategoryID,
+		thread.AttachedImages,
+		threadID,
+	)
 	if err != nil {
 		http.Error(w, "Failed to update thread", http.StatusInternalServerError)
 		return

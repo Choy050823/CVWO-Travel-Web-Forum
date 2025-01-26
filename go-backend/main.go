@@ -61,12 +61,12 @@ func main() {
 		handlers.GetCommentsByThread(w, r, database.DB)
 	}).Methods("GET")
 
+	r.HandleFunc("/api/users/{id}", func(w http.ResponseWriter, r *http.Request) {
+		handlers.GetUserProfile(w, r, database.DB)
+	}).Methods("GET")
+
 	// Protected Routes (Login User Only)
 	// User routes
-	r.HandleFunc("/api/users/{id}", middleware.AuthMiddleware(func(w http.ResponseWriter, r *http.Request) {
-		handlers.GetUserProfile(w, r, database.DB)
-	})).Methods("GET")
-
 	r.HandleFunc("/api/me", middleware.AuthMiddleware(func(w http.ResponseWriter, r *http.Request) {
 		handlers.GetCurrentUser(w, r, database.DB)
 	})).Methods("GET")
@@ -95,6 +95,10 @@ func main() {
 	// Thread routes
 	r.HandleFunc("/api/threads", middleware.AuthMiddleware(func(w http.ResponseWriter, r *http.Request) {
 		handlers.CreateThread(w, r, database.DB)
+	})).Methods("POST")
+
+	r.HandleFunc("/api/upload-images", middleware.AuthMiddleware(func(w http.ResponseWriter, r *http.Request) {
+		handlers.UploadImages(w, r, database.DB)
 	})).Methods("POST")
 
 	r.HandleFunc("/api/my-threads", middleware.AuthMiddleware(func(w http.ResponseWriter, r *http.Request) {

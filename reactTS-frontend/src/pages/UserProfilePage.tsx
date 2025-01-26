@@ -1,20 +1,30 @@
 import React from "react";
-import { User } from "../models/models";
+import { useParams } from "react-router-dom";
+import { useUser } from "../context/UserContext"; // Import useUser
 
-interface UserProfilePageProps {
-  user: User;
-}
+const UserProfilePage: React.FC = () => {
+  const { id } = useParams<{ id: string }>();
+  const { userDetails, fetchUserDetails } = useUser();
 
-const UserProfilePage: React.FC<UserProfilePageProps> = ({ user }) => {
+  React.useEffect(() => {
+    if (id) {
+      fetchUserDetails(parseInt(id));
+    }
+  }, [id, fetchUserDetails]);
+
+  if (!userDetails) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <div>
       <h1>USER PROFILE</h1>
-      <img src={user.profilePicture || ""} alt="Profile" />
+      <img src={userDetails.profilePicture || ""} alt="Profile" />
       <ul>
-        <li>Username: {user.username}</li>
-        <li>User Email: {user.email}</li>
-        <li>Bio: {user.bio || "No bio available"}</li>
-        <li>Role: {user.role}</li>
+        <li>Username: {userDetails.username}</li>
+        <li>User Email: {userDetails.email}</li>
+        <li>Bio: {userDetails.bio || "No bio available"}</li>
+        <li>Role: {userDetails.role}</li>
       </ul>
     </div>
   );

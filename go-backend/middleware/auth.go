@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"net/http"
+
 	// "os"
 	"strings"
 
@@ -81,12 +82,12 @@ func AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 			return
 		}
 
-		// Add the authorized user id to the request context
+		// Add the claims to the request context
 		ctx := context.WithValue(r.Context(), "claims", claims)
+		ctx = context.WithValue(ctx, "user_id", claims.UserID)
 		r = r.WithContext(ctx)
 
-		log.Printf("Token: %s", tokenString)
-		log.Printf("Claims: %+v", claims)
+		log.Printf("Token validated successfully. UserID: %d", claims.UserID)
 
 		// Call the next middleware or handler
 		next(w, r)
