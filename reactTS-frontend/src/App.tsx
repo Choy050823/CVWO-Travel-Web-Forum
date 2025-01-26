@@ -14,6 +14,7 @@ import CreateEditThreadPage from "./pages/CreateEditThreadPage";
 import SearchPage from "./pages/SearchPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminRoute from "./components/AdminRoute";
+import { CommentProvider } from "./context/CommentContext";
 
 const App = () => {
   return (
@@ -22,55 +23,57 @@ const App = () => {
         <UserProvider>
           {/* Wrap with UserProvider */}
           <ThreadProvider>
-            <Navbar />
+            <CommentProvider>
+              <Navbar />
 
-            <Routes>
-              {/* General Users */}
-              <Route path="/" element={<HomePage />} />
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/signup" element={<SignUpPage />} />
-              <Route path="/search" element={<SearchPage />} />
-              <Route path="/threads/:id" element={<ThreadDetailsPage />} />
+              <Routes>
+                {/* General Users */}
+                <Route path="/" element={<HomePage />} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/signup" element={<SignUpPage />} />
+                <Route path="/search" element={<SearchPage />} />
+                <Route path="/threads/:id" element={<ThreadDetailsPage />} />
 
-              <Route path="*" element={<ErrorPage />} />
+                <Route path="*" element={<ErrorPage />} />
 
-              {/* Login Users */}
-              <Route
-                path="/user/:id"
-                element={
-                  <ProtectedRoute>
-                    <UserProfilePage />
-                  </ProtectedRoute>
-                }
-              />
+                {/* Login Users */}
+                <Route
+                  path="/user/:id"
+                  element={
+                    <ProtectedRoute>
+                      <UserProfilePage />
+                    </ProtectedRoute>
+                  }
+                />
 
-              <Route
-                path="/create-thread"
-                element={
-                  <ProtectedRoute>
-                    <CreateEditThreadPage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/edit-thread/:id"
-                element={
-                  <ProtectedRoute>
-                    <CreateEditThreadPage />
-                  </ProtectedRoute>
-                }
-              />
+                <Route
+                  path="/create-thread"
+                  element={
+                    <ProtectedRoute>
+                      <CreateEditThreadPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/edit-thread/:id"
+                  element={
+                    <ProtectedRoute>
+                      <CreateEditThreadPage />
+                    </ProtectedRoute>
+                  }
+                />
 
-              {/* Admin Only */}
-              <Route
-                path="/admin"
-                element={
-                  <AdminRoute>
-                    <AdminDashboardPage />
-                  </AdminRoute>
-                }
-              />
-            </Routes>
+                {/* Admin Only */}
+                <Route
+                  path="/admin"
+                  element={
+                    <AdminRoute>
+                      <AdminDashboardPage />
+                    </AdminRoute>
+                  }
+                />
+              </Routes>
+            </CommentProvider>
           </ThreadProvider>
         </UserProvider>
       </AuthProvider>

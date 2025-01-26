@@ -3,6 +3,7 @@ package handlers
 import (
 	"database/sql"
 	"encoding/json"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -278,4 +279,24 @@ func DeleteThread(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	}
 
 	w.WriteHeader(http.StatusNoContent)
+}
+
+func LikeThread(w http.ResponseWriter, r *http.Request, db *sql.DB) {
+	vars := mux.Vars(r)
+	threadID, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		http.Error(w, "Invalid thread ID", http.StatusBadRequest)
+		return
+	}
+
+	query := `UPDATE threads SET likes = likes + 1 WHERE id = $1`
+	_, err = db.Exec(query, threadID)
+	if err != nil {
+		log.Printf("Error liking thread: %v", err)
+		http.Error(w, "Failed to like thread", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{"message": "Thread liked successfully"})
 }

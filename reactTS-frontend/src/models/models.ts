@@ -29,8 +29,8 @@ export interface Comment {
   id: number;
   content: string;
   attachedImages: string[];
-  //   posted by which user
-  postedBy: number;
+  userId: number;        // From database user_id
+  author?: string;        // Added from JOIN with users
   threadId: number;
   createdAt: Date;
   upvotes: number;

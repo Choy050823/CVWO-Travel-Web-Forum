@@ -8,6 +8,7 @@ interface ThreadContextType {
   createThread: (thread: Omit<Thread, "id">) => Promise<void>;
   updateThread: (thread: Thread) => Promise<void>;
   deleteThread: (threadId: number) => Promise<void>;
+  likeThread: (threadId: number) => Promise<void>;
 }
 
 const ThreadContext = createContext<ThreadContextType | undefined>(undefined);
@@ -131,6 +132,24 @@ export const ThreadProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
+  const likeThread = async (threadId: number) => {
+    try {
+      const response = await fetch(`/api/threads/${threadId}/like`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+      if (!response.ok) throw new Error("Failed to like thread");
+      // Update the local state
+      setThreads((prev) =>
+        prev.map((t) => (t.id === threadId ? { ...t, likes: t.likes + 1 } : t))
+      );
+    } catch (err) {
+      console.error("Error liking thread:", err);
+    }
+  };
+
   // Fetch threads on mount
   useEffect(() => {
     fetchThreads();
@@ -144,6 +163,7 @@ export const ThreadProvider: React.FC<{ children: React.ReactNode }> = ({
         createThread,
         updateThread,
         deleteThread,
+        likeThread
       }}
     >
       {children}

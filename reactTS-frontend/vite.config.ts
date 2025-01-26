@@ -1,9 +1,8 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
-import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  plugins: [react()],
   server: {
     fs: {
       // Allow serving files from the project root and node_modules/leaflet/dist/images
@@ -15,5 +14,4 @@ export default defineConfig({
       ],
     },
   },
-  
 });

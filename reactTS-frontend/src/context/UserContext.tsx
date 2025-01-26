@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext } from "react";
+import React, { createContext, useContext } from "react";
 import { User } from "../models/models";
 import BASE_URL from "../config";
 

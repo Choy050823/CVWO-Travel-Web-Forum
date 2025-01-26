@@ -126,6 +126,18 @@ func main() {
 		handlers.DeleteComment(w, r, database.DB)
 	})).Methods("DELETE")
 
+	r.HandleFunc("/api/comments/{id}/upvote", middleware.AuthMiddleware(func(w http.ResponseWriter, r *http.Request) {
+		handlers.UpvoteComment(w, r, database.DB)
+	})).Methods("POST")
+
+	r.HandleFunc("/api/comments/{id}/downvote", middleware.AuthMiddleware(func(w http.ResponseWriter, r *http.Request) {
+		handlers.DownvoteComment(w, r, database.DB)
+	})).Methods("POST")
+
+	r.HandleFunc("/api/threads/{id}/like", middleware.AuthMiddleware(func(w http.ResponseWriter, r *http.Request) {
+		handlers.LikeThread(w, r, database.DB)
+	})).Methods("POST")
+
 	// Configure CORS
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"http://localhost:5173"}, // Allow your React frontend origin
