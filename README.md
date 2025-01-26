@@ -20,8 +20,8 @@ Ensure you have the following installed on your machine:
 ### 1. Clone the Repository
 
 ```bash
-git clone <repository-url>
-cd <repository-folder>
+git clone https://github.com/Choy050823/CVWO-Travel-Web-Forum.git
+cd <CVWO-Travel-Web-Forum>
 ```
 
 ### 2. Install Dependencies
