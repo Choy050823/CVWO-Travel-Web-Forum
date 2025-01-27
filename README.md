@@ -135,5 +135,5 @@ The frontend application will be available at `http://localhost:5173`.
 
 ---
 
-You're now ready to run and develop the project! For any issues, feel free to open an issue in the repository or contact the maintainers.
+You're now ready to run and develop the project! For any issues, feel free to contact Choy Min Han at choymh23@u.nus.edu
 
