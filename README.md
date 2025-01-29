@@ -1,4 +1,4 @@
-# Project Setup Guide
+# CVWO Project: WanderVerse - Travel Web Forum
 
 This document provides step-by-step instructions to set up and run the project, including setting up the PostgreSQL database, backend, and frontend.
 
@@ -20,6 +20,7 @@ Ensure you have the following installed on your machine:
 ### 1. Clone the Repository
 
 ```bash
+git config --global http.postBuffer 524288000
 git clone https://github.com/Choy050823/CVWO-Travel-Web-Forum.git
 cd CVWO-Travel-Web-Forum
 ```
@@ -135,5 +136,5 @@ The frontend application will be available at `http://localhost:5173`.
 
 ---
 
-You're now ready to run and develop the project! For any issues, feel free to open an issue in the repository or contact the maintainers.
+You're now ready to run and develop the project! For any issues, feel free to contact Choy Min Han at choymh23@u.nus.edu
 
