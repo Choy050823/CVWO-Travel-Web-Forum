@@ -20,6 +20,7 @@ Ensure you have the following installed on your machine:
 ### 1. Clone the Repository
 
 ```bash
+git config --global http.postBuffer 524288000
 git clone https://github.com/Choy050823/CVWO-Travel-Web-Forum.git
 cd CVWO-Travel-Web-Forum
 ```
