@@ -6,18 +6,21 @@ import { useAuth } from "../context/AuthContext";
 import { FaComment, FaRegClock, FaUserCircle } from "react-icons/fa";
 import { AiFillLike } from "react-icons/ai";
 import { FiArrowUp, FiArrowDown } from "react-icons/fi";
+import { useUser } from "../context/UserContext";
 
 const ThreadDetailsPage: React.FC = () => {
   // All hooks declared at the top (before any conditionals)
   const { id: threadId } = useParams<{ id: string }>();
   const { comments, loading, error, fetchComments, createComment } =
     useComments();
-  const { threads, likeThread } = useThreads();
+  const { threads, likeThread, fetchThreads } = useThreads();
   const { user } = useAuth();
+  const { fetchUserDetails } = useUser();
   const [newComment, setNewComment] = useState("");
   const { upvoteComment, downvoteComment } = useComments();
   const [votedComments, setVotedComments] = useState<number[]>([]);
   const [votedThreads, setVotedThreads] = useState<number[]>([]);
+  const [postedBy, setPostedBy] = React.useState<string>("Unknown User");
 
   // Fetch comments when the threadId changes
   useEffect(() => {
@@ -28,6 +31,26 @@ const ThreadDetailsPage: React.FC = () => {
 
   // Find the current thread
   const thread = threads.find((t) => t.id === parseInt(threadId || ""));
+
+  React.useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        console.log("Current thread: ", thread?.postedBy);
+        if (thread?.postedBy == undefined) {
+          await fetchThreads();
+        }
+        const fetchedUser = await fetchUserDetails(thread!.postedBy); // Fetch user details
+        if (fetchedUser) {
+          setPostedBy(fetchedUser.username); // Update local state
+        }
+      } catch (error) {
+        console.error("Error fetching user details:", error);
+      }
+    };
+    console.log("changing user");
+    console.log("Curernt User ID: ", user?.id);
+    fetchUser();
+  }, [thread?.postedBy, fetchUserDetails]);
 
   const handleCommentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -88,7 +111,7 @@ const ThreadDetailsPage: React.FC = () => {
         <div className="flex items-center gap-3 text-sm text-gray-500 mb-4">
           <span className="flex items-center gap-1">
             <FaUserCircle className="text-gray-400" />
-            {thread.postedBy}
+            {postedBy}
           </span>
           <span>•</span>
           <span className="flex items-center gap-1">
