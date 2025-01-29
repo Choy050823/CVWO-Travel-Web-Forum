@@ -161,12 +161,15 @@ export const CommentProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const upvoteComment = async (commentId: number) => {
     try {
-      const response = await fetch(`/api/comments/${commentId}/upvote`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
+      const response = await fetch(
+        `${BASE_URL}/api/comments/${commentId}/upvote`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
       if (!response.ok) throw new Error("Failed to upvote comment");
       // Update the local state
       setComments((prev) =>
@@ -181,12 +184,15 @@ export const CommentProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const downvoteComment = async (commentId: number) => {
     try {
-      const response = await fetch(`/api/comments/${commentId}/downvote`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
+      const response = await fetch(
+        `${BASE_URL}/api/comments/${commentId}/downvote`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
       if (!response.ok) throw new Error("Failed to downvote comment");
       // Update the local state
       setComments((prev) =>

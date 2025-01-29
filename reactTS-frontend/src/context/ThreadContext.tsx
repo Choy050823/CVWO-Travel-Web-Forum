@@ -134,7 +134,7 @@ export const ThreadProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const likeThread = async (threadId: number) => {
     try {
-      const response = await fetch(`/api/threads/${threadId}/like`, {
+      const response = await fetch(`${BASE_URL}/api/threads/${threadId}/like`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -163,7 +163,7 @@ export const ThreadProvider: React.FC<{ children: React.ReactNode }> = ({
         createThread,
         updateThread,
         deleteThread,
-        likeThread
+        likeThread,
       }}
     >
       {children}
