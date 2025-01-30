@@ -7,6 +7,8 @@ import { FaComment, FaRegClock, FaUserCircle } from "react-icons/fa";
 import { AiFillLike } from "react-icons/ai";
 import { FiArrowUp, FiArrowDown } from "react-icons/fi";
 import { useUser } from "../context/UserContext";
+import { Category } from "../models/models";
+import BASE_URL from "../config";
 
 const ThreadDetailsPage: React.FC = () => {
   // All hooks declared at the top (before any conditionals)
@@ -21,6 +23,7 @@ const ThreadDetailsPage: React.FC = () => {
   const [votedComments, setVotedComments] = useState<number[]>([]);
   const [votedThreads, setVotedThreads] = useState<number[]>([]);
   const [postedBy, setPostedBy] = React.useState<string>("Unknown User");
+  const [category, setCategory] = React.useState<Category>();
 
   // Fetch comments when the threadId changes
   useEffect(() => {
@@ -47,8 +50,20 @@ const ThreadDetailsPage: React.FC = () => {
         console.error("Error fetching user details:", error);
       }
     };
+
+    const fetchCategory = async () => {
+      try {
+        const res = await fetch(
+          `${BASE_URL}/api/categories/${thread?.categoryId}`
+        );
+        setCategory(await res.json());
+      } catch (error) {
+        console.error("Error fetching categories: ", error);
+      }
+    };
     console.log("changing user");
     console.log("Curernt User ID: ", user?.id);
+    fetchCategory();
     fetchUser();
   }, [thread?.postedBy, fetchUserDetails]);
 
@@ -117,6 +132,12 @@ const ThreadDetailsPage: React.FC = () => {
           <span className="flex items-center gap-1">
             <FaRegClock className="text-gray-400" />
             {new Date(thread.createdAt).toLocaleDateString()}
+          </span>
+          <span
+            key={thread.categoryId}
+            className="px-3 py-1 bg-gray-200 text-gray-700 text-sm rounded-full cursor-pointer"
+          >
+            {category ? category.name : "Unknown"}
           </span>
         </div>
 

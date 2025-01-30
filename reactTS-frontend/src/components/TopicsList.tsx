@@ -1,11 +1,22 @@
-const topics = [
-  "Technology",
-  "Design Thinking",
-  "Crypto",
-  "NFT",
-  "Personal Growth",
-  "Reading",
-];
+import BASE_URL from "../config";
+import { Category } from "../models/models";
+
+
+
+const fetchCategories = async (): Promise<Category[]> => {
+  try {
+    const response = await fetch(`${BASE_URL}/api/categories`);
+    if (!response.ok) {
+      throw new Error("Failed to fetch categories");
+    }
+    return await response.json();
+  } catch (error) {
+    console.error("Error fetching categories:", error);
+    return [];
+  }
+};
+
+const topics = await fetchCategories();
 
 const TopicsList = () => {
   return (
@@ -17,7 +28,7 @@ const TopicsList = () => {
             key={index}
             className="px-3 py-1 bg-gray-200 text-gray-700 text-sm rounded-full cursor-pointer"
           >
-            {topic}
+            {topic.name}
           </span>
         ))}
       </div>
