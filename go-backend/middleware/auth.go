@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"net/http"
+	"os"
 
 	// "os"
 	"strings"
@@ -13,8 +14,8 @@ import (
 	"github.com/golang-jwt/jwt"
 )
 
-// var jwtKey = []byte(os.Getenv("JWT_SECRET_KEY"))
-var jwtKey = []byte("5lfX8Bl4C1mZZ/ljU+BrWFoxTcxQqacwPVfloDs+5No=")
+var jwtKey = []byte(os.Getenv("JWT_SECRET_KEY"))
+// var jwtKey = []byte("5lfX8Bl4C1mZZ/ljU+BrWFoxTcxQqacwPVfloDs+5No=")
 
 func AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {

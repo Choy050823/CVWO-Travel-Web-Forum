@@ -3,8 +3,10 @@ package handlers
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"regexp"
 	"strconv"
 	"time"
@@ -17,7 +19,8 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-var jwtKey = []byte("5lfX8Bl4C1mZZ/ljU+BrWFoxTcxQqacwPVfloDs+5No=")
+var jwtKey = []byte(os.Getenv("JWT_SECRET_KEY"))
+// var jwtKey = []byte("5lfX8Bl4C1mZZ/ljU+BrWFoxTcxQqacwPVfloDs+5No=")
 
 func isValidEmail(email string) bool {
 	emailRegex := `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
@@ -110,15 +113,20 @@ func Login(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	// Fetch the user from the database
 	var user models.User
 	query := `SELECT id, username, email, password_hash, role, created_at FROM users WHERE email = $1`
-	err = db.QueryRow(query, req.Email).Scan(&user.ID, &user.Username, &user.Email, &user.PasswordHash, &user.Role, &user.CreatedAt)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			http.Error(w, "User not found", http.StatusNotFound)
-		} else {
-			http.Error(w, "Database error", http.StatusInternalServerError)
-		}
-		return
-	}
+    fmt.Println("Executing query:", query) // Log the query
+
+    err = db.QueryRow(query, req.Email).Scan(&user.ID, &user.Username, &user.Email, &user.PasswordHash, &user.Role, &user.CreatedAt)
+    if err != nil {
+        fmt.Println("Query error:", err) // Log the error from QueryRow
+        if err == sql.ErrNoRows {
+            http.Error(w, "User not found", http.StatusNotFound)
+        } else {
+            http.Error(w, "Database error", http.StatusInternalServerError)
+        }
+        return
+    }
+
+    fmt.Println("User found:", user) // Log the user data (for debugging only - remove in production)
 
 	// Compare the password hash
 	err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(req.Password))
