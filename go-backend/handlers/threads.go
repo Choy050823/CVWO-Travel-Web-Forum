@@ -65,10 +65,11 @@ func CreateThread(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 // GetAllThreads retrieves all threads
 func GetAllThreads(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	rows, err := db.Query(`
-    SELECT id, title, content, user_id, category_id, created_at
-    FROM threads
-  `)
+		SELECT id, title, content, user_id, category_id, created_at
+		FROM threads
+  	`)
 	if err != nil {
+		log.Printf("GetAllThreads: db.Query error: %v", err)
 		http.Error(w, "Failed to fetch threads", http.StatusInternalServerError)
 		return
 	}
