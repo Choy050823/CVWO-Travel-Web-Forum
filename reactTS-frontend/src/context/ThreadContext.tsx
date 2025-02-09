@@ -29,16 +29,19 @@ export const ThreadProvider: React.FC<{ children: React.ReactNode }> = ({
         throw new Error("Failed to fetch threads");
       }
 
-      const data = await response.json();
+      var data = await response.json();
+      if (!data) {
+        data = [];
+      }
       console.log(data);
 
       // Transform the data to match the frontend Thread model
-      const transformedThreads = data.map((thread: any) => ({
+      const transformedThreads = data.map((thread: Thread) => ({
         id: thread.id,
         title: thread.title,
         content: thread.content,
         attachedImages: thread.attachedImages || [],
-        postedBy: thread.userId, // Ensure this matches the backend
+        postedBy: thread.postedBy, // Ensure this matches the backend
         categoryId: thread.categoryId, // Use categoryId instead of categories
         createdAt: new Date(thread.createdAt),
         likes: thread.likes || 0,
