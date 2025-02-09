@@ -1,8 +1,10 @@
 // import BASE_URL from "../config";
+import { useState } from "react";
 import { Category } from "../models/models";
+import React from "react";
 
 const BASE_URL = import.meta.env.VITE_API_URL;
-console.log(BASE_URL);
+const [topics, setTopics] = useState<Category[]>([]);
 
 const fetchCategories = async (): Promise<Category[]> => {
   try {
@@ -10,14 +12,24 @@ const fetchCategories = async (): Promise<Category[]> => {
     if (!response.ok) {
       throw new Error("Failed to fetch categories");
     }
-    return await response.json();
+    const res = await response.json();
+    setTopics(res);
+    return topics;
   } catch (error) {
     console.error("Error fetching categories:", error);
     return [];
   }
 };
 
-const topics = await fetchCategories();
+React.useEffect(() => {
+  const fetchData = async () => {
+    await fetchCategories();
+  };
+  fetchData();
+}, [])
+
+
+
 
 const TopicsList = () => {
   return (
