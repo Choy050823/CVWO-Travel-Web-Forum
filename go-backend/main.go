@@ -19,6 +19,10 @@ import (
 	// "github.com/joho/godotenv"
 	_ "github.com/lib/pq" // Import the PostgreSQL driver
 	"github.com/rs/cors"
+
+	"github.com/golang-migrate/migrate/v4" // Add this import
+
+    _ "github.com/golang-migrate/migrate/v4/database/postgres" // Import the postgres driver
 )
 
 func main() {
