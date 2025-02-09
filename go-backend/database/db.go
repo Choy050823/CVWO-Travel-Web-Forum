@@ -64,39 +64,39 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"path/filepath"
+	// "path/filepath"
 
-	"github.com/joho/godotenv"
+	// "github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 )
 
 var DB *sql.DB
 
-func InitDB(dbUser, dbPassword, dbName, dbHost, dbPort string) {
-// func InitDB() {
+// func InitDB(dbUser, dbPassword, dbName, dbHost, dbPort string) {
+func InitDB() {
 	// local test
-	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
-		dbHost, dbPort, dbUser, dbPassword, dbName)
+	// psqlInfo := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
+	// 	dbHost, dbPort, dbUser, dbPassword, dbName)
 
-	rootDir, err := os.Getwd()
-	if err != nil {
-		log.Fatal("Error getting working directory:", err)
-	}
+	// rootDir, err := os.Getwd()
+	// if err != nil {
+	// 	log.Fatal("Error getting working directory:", err)
+	// }
 
-	envPath := filepath.Join(rootDir, "..", ".env") // Go up one level for .env
-	err = godotenv.Load(envPath)
-	if err != nil {
-			log.Println("No .env file found, using environment variables")
-	}
+	// envPath := filepath.Join(rootDir, "..", ".env") // Go up one level for .env
+	// err = godotenv.Load(envPath)
+	// if err != nil {
+	// 		log.Println("No .env file found, using environment variables")
+	// }
 
 	dbURL := os.Getenv("DATABASE_URL") // Get from environment variable
     if dbURL == "" {
         log.Fatal("DATABASE_URL environment variable not set")
     }
 
-	// var err error
-	DB, err = sql.Open("postgres", psqlInfo)
-	// DB, err = sql.Open("postgres", dbURL)
+	var err error
+	// DB, err = sql.Open("postgres", psqlInfo)
+	DB, err = sql.Open("postgres", dbURL)
 	if err != nil {
 		log.Fatal(err)
 	}
