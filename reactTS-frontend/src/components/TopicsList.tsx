@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Category } from "../models/models";
 
-const BASE_URL = import.meta.env.VITE_API_URL;
+const BASE_URL = import.meta.env.VITE_API_URL.replace(/\/$/, "");
 
 const TopicsList: React.FC = () => {
   const [topics, setTopics] = useState<Category[]>([]);

@@ -174,13 +174,23 @@ func main() {
 	})).Methods("POST")
 
 	// CORS configuration
-	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{frontendURL},
-		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowedHeaders:   []string{"Content-Type", "Authorization"},
-		AllowCredentials: true,
-	})
-	handler := c.Handler(r)
+    c := cors.New(cors.Options{
+        AllowedOrigins: []string{
+            "http://localhost:5173",
+            "https://wanderverse-p5eh.onrender.com",
+            frontendURL,
+        },
+        AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+        AllowedHeaders: []string{
+            "Content-Type",
+            "Authorization",
+            "Access-Control-Allow-Origin",
+            "Access-Control-Allow-Headers",
+        },
+        AllowCredentials: true,
+        Debug:           true, // Enable for debugging CORS issues
+    })
+    handler := c.Handler(r)
 
 	// Create HTTP server
 	srv := &http.Server{
