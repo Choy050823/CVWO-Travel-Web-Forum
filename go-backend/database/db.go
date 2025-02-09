@@ -72,7 +72,9 @@ import (
 
 var DB *sql.DB
 
+// func InitDB(dbUser, dbPassword, dbName, dbHost, dbPort string) {
 func InitDB() {
+	// local test
 	// psqlInfo := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
 	// 	dbHost, dbPort, dbUser, dbPassword, dbName)
 
@@ -93,6 +95,7 @@ func InitDB() {
     }
 
 	var err error
+	// DB, err = sql.Open("postgres", psqlInfo)
 	DB, err = sql.Open("postgres", dbURL)
 	if err != nil {
 		log.Fatal(err)
