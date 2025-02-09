@@ -36,12 +36,12 @@ export const ThreadProvider: React.FC<{ children: React.ReactNode }> = ({
       console.log(data);
 
       // Transform the data to match the frontend Thread model
-      const transformedThreads = data.map((thread: Thread) => ({
+      const transformedThreads = data.map((thread: any) => ({
         id: thread.id,
         title: thread.title,
         content: thread.content,
         attachedImages: thread.attachedImages || [],
-        postedBy: thread.postedBy, // Ensure this matches the backend
+        postedBy: thread.userId, // Ensure this matches the backend
         categoryId: thread.categoryId, // Use categoryId instead of categories
         createdAt: new Date(thread.createdAt),
         likes: thread.likes || 0,
