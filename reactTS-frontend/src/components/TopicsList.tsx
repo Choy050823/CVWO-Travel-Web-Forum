@@ -23,7 +23,11 @@ const TopicsList: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       const res = await fetchCategories();
-      setTopics(res);
+      if (!res) {
+        setTopics([]);
+      } else {
+        setTopics(res);
+      }
       console.log(topics);
     };
     fetchData();
