@@ -13,8 +13,7 @@ const fetchCategories = async (): Promise<Category[]> => {
       throw new Error("Failed to fetch categories");
     }
     const res = await response.json();
-    setTopics(res);
-    return topics;
+    return res;
   } catch (error) {
     console.error("Error fetching categories:", error);
     return [];
@@ -23,7 +22,9 @@ const fetchCategories = async (): Promise<Category[]> => {
 
 React.useEffect(() => {
   const fetchData = async () => {
-    await fetchCategories();
+    const res = await fetchCategories();
+    setTopics(res);
+    console.log(topics);
   };
   fetchData();
 }, [])
