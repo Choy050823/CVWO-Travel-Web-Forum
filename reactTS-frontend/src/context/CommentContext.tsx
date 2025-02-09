@@ -1,7 +1,9 @@
 // CommentContext.tsx
 import React, { createContext, useState, useContext } from "react";
 import { Comment } from "../models/models";
-import BASE_URL from "../config";
+// import BASE_URL from "../config";
+
+const BASE_URL = import.meta.env.VITE_API_URL;
 
 interface CommentContextType {
   comments: Comment[];

@@ -8,7 +8,9 @@ import { AiFillLike } from "react-icons/ai";
 import { FiArrowUp, FiArrowDown } from "react-icons/fi";
 import { useUser } from "../context/UserContext";
 import { Category } from "../models/models";
-import BASE_URL from "../config";
+// import BASE_URL from "../config";
+
+const BASE_URL = import.meta.env.VITE_API_URL;
 
 const ThreadDetailsPage: React.FC = () => {
   // All hooks declared at the top (before any conditionals)

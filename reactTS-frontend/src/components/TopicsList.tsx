@@ -1,7 +1,8 @@
-import BASE_URL from "../config";
+// import BASE_URL from "../config";
 import { Category } from "../models/models";
 
-
+const BASE_URL = import.meta.env.VITE_API_URL;
+console.log(BASE_URL);
 
 const fetchCategories = async (): Promise<Category[]> => {
   try {

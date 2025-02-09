@@ -1,6 +1,8 @@
 import React, { createContext, useContext } from "react";
 import { User } from "../models/models";
-import BASE_URL from "../config";
+// import BASE_URL from "../config";
+
+const BASE_URL = import.meta.env.VITE_API_URL;
 
 interface UserContextType {
   fetchUserDetails: (userId: number) => Promise<User | null>; // Return user details directly

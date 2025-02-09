@@ -1,5 +1,5 @@
 import React from "react";
-import { Comment } from "../models/models";
+import { Comment, User } from "../models/models";
 import { useUser } from "../context/UserContext";
 
 interface CommentProps {
@@ -7,16 +7,18 @@ interface CommentProps {
 }
 
 const CommentComponent: React.FC<CommentProps> = ({ comment }) => {
-  const { userDetails, fetchUserDetails } = useUser();
+  const { fetchUserDetails } = useUser();
   const [postedBy, setPostedBy] = React.useState<string>("");
+  const [user, setUser] = React.useState<User | null>(null);
 
   React.useEffect(() => {
     const fetchUser = async () => {
-      await fetchUserDetails(comment.postedBy);
-      setPostedBy(userDetails?.username || "Unknown User");
+      const res = await fetchUserDetails(comment.userId);
+      setUser(res);
+      setPostedBy(user?.username || "Unknown User");
     };
     fetchUser();
-  }, [comment.postedBy, fetchUserDetails, userDetails]);
+  }, [comment.userId, fetchUserDetails]);
 
   return (
     <div className="bg-gray-50 p-4 rounded-lg mb-4">

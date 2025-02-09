@@ -2,7 +2,9 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { useThreads } from "../context/ThreadContext";
 import { useAuth } from "../context/AuthContext";
-import BASE_URL from "../config";
+// import BASE_URL from "../config";
+
+const BASE_URL = import.meta.env.VITE_API_URL;
 
 const CreateEditThreadPage: React.FC = () => {
   const { id } = useParams();
