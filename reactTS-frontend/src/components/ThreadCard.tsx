@@ -70,19 +70,26 @@ const ThreadCard: React.FC<ThreadCardProps> = ({
         <span>{new Date(thread.createdAt).toLocaleDateString()}</span>
       </div>
       <div className="flex space-x-3 mt-4" onClick={(e) => e.stopPropagation()}>
-        <FaBookmark className="text-gray-500 hover:text-gray-700 cursor-pointer" />
+        <FaBookmark
+          className={`text-gray-500 hover:text-gray-700 cursor-pointer`}
+        />
 
         {/* Show Edit and Trash icons only if the thread belongs to the current user */}
         {isCurrentUserThread && (
           <>
-            <FaEdit
+            <button
               onClick={onEdit}
               className="text-blue-500 hover:text-blue-600 cursor-pointer"
-            />
-            <FaTrash
+            >
+              <FaEdit />
+            </button>
+
+            <button
               onClick={onDelete}
               className="text-red-500 hover:text-red-600 cursor-pointer"
-            />
+            >
+              <FaTrash />
+            </button>
           </>
         )}
       </div>

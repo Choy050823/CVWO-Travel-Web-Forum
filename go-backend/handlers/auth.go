@@ -6,7 +6,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
+	// "os"
+	// "path/filepath"
 	"regexp"
 	"strconv"
 	"time"
@@ -16,11 +17,26 @@ import (
 
 	"github.com/golang-jwt/jwt"
 	"github.com/gorilla/mux"
+	// "github.com/joho/godotenv"
 	"golang.org/x/crypto/bcrypt"
 )
 
-var jwtKey = []byte(os.Getenv("JWT_SECRET_KEY"))
-// var jwtKey = []byte("5lfX8Bl4C1mZZ/ljU+BrWFoxTcxQqacwPVfloDs+5No=")
+// func init() {
+// 	// Construct path to .env file in the root directory
+// 	rootDir, err := os.Getwd()
+// 	if err != nil {
+// 		log.Fatal("Error getting working directory:", err)
+// 	}
+
+// 	envPath := filepath.Join(rootDir, "..", ".env") // Go up one level for .env
+// 	err = godotenv.Load(envPath)
+// 	if err != nil {
+// 		log.Println("No .env file found, using environment variables")
+// 	}
+// }
+
+// var jwtKey = []byte(os.Getenv("JWT_SECRET_KEY"))
+var jwtKey = []byte("5lfX8Bl4C1mZZ/ljU+BrWFoxTcxQqacwPVfloDs+5No=")
 
 func isValidEmail(email string) bool {
 	emailRegex := `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`

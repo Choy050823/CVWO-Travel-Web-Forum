@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 
-	// "path/filepath"
+	"path/filepath"
 	// "database/sql"
 	"log"
 	"net/http"
@@ -16,7 +16,7 @@ import (
 	"travel-forum-backend/middleware"
 
 	"github.com/gorilla/mux"
-	// "github.com/joho/godotenv"
+	"github.com/joho/godotenv"
 	_ "github.com/lib/pq" // Import the PostgreSQL driver
 	"github.com/rs/cors"
 )
@@ -24,16 +24,16 @@ import (
 func main() {
 	// local test only
 	// Construct path to .env file in the root directory
-	// rootDir, err := os.Getwd()
-	// if err != nil {
-	// 		log.Fatal("Error getting working directory:", err)
-	// }
+	rootDir, err := os.Getwd()
+	if err != nil {
+			log.Fatal("Error getting working directory:", err)
+	}
 
-	// envPath := filepath.Join(rootDir, "..", ".env") // Go up one level for .env
-	// err = godotenv.Load(envPath)
-	// if err != nil {
-	// 	log.Println("No .env file found, using environment variables")
-	// }
+	envPath := filepath.Join(rootDir, "..", ".env") // Go up one level for .env
+	err = godotenv.Load(envPath)
+	if err != nil {
+		log.Println("No .env file found, using environment variables")
+	}
 	
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -46,18 +46,18 @@ func main() {
 	}
 
 	// local testing
-	// dbUser := os.Getenv("DB_USER")
-	// dbPassword := os.Getenv("DB_PASSWORD")
-	// dbName := os.Getenv("DB_NAME")
-	// dbHost := os.Getenv("DB_HOST")
-	// dbPort := os.Getenv("DB_PORT")
+	dbUser := os.Getenv("DB_USER")
+	dbPassword := os.Getenv("DB_PASSWORD")
+	dbName := os.Getenv("DB_NAME")
+	dbHost := os.Getenv("DB_HOST")
+	dbPort := os.Getenv("DB_PORT")
 
 	// Initialize database connection
-	// database.InitDB(dbUser, dbPassword, dbName, dbHost, dbPort) // Pass dbPort here
+	database.InitDB(dbUser, dbPassword, dbName, dbHost, dbPort) // Pass dbPort here
 
 	// Test on production state
 	// Initialize database connection (using DATABASE_URL)
-    database.InitDB() // No need to pass individual credentials anymore
+    // database.InitDB() // No need to pass individual credentials anymore
 	defer database.DB.Close()
 
 	// Create a new router

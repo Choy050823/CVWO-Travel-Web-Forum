@@ -132,7 +132,7 @@ const ThreadDetailsPage: React.FC = () => {
           </span>
           <span>•</span>
           <span className="flex items-center gap-1">
-            <FaRegClock className="text-gray-400" />
+            <FaRegClock className={`text-gray-400`} />
             {new Date(thread.createdAt).toLocaleDateString()}
           </span>
           <span
@@ -164,11 +164,11 @@ const ThreadDetailsPage: React.FC = () => {
             disabled={votedThreads.includes(thread.id)}
             className="flex items-center gap-2 hover:text-blue-600 disabled:opacity-50"
           >
-            <AiFillLike className="text-lg" />
+            <AiFillLike className={`text-lg`} />
             {thread.likes}
           </button>
           <button className="flex items-center gap-2 hover:text-blue-600">
-            <FaComment className="text-lg" />
+            <FaComment className={`text-lg`} />
             {comments?.length || 0} Comments
           </button>
         </div>
@@ -218,7 +218,7 @@ const ThreadDetailsPage: React.FC = () => {
               className="border-b border-gray-100 pb-6 last:border-0"
             >
               <div className="flex items-center gap-3 text-sm text-gray-500 mb-3">
-                <FaUserCircle className="text-gray-400" />
+                <FaUserCircle className={`text-gray-400`} />
                 <span>{comment.author}</span>
                 <span>•</span>
                 <span>{new Date(comment.createdAt).toLocaleDateString()}</span>
@@ -230,7 +230,7 @@ const ThreadDetailsPage: React.FC = () => {
                   disabled={votedComments.includes(comment.id)}
                   className="flex items-center gap-1 hover:text-blue-600 disabled:opacity-50"
                 >
-                  <FiArrowUp className="text-lg" />
+                  <FiArrowUp className={`text-lg`} />
                   {comment.upvotes}
                 </button>
 
@@ -239,7 +239,7 @@ const ThreadDetailsPage: React.FC = () => {
                   disabled={votedComments.includes(comment.id)}
                   className="flex items-center gap-1 hover:text-blue-600 disabled:opacity-50"
                 >
-                  <FiArrowDown className="text-lg" />
+                  <FiArrowDown className={`text-lg`} />
                   {comment.downvotes}
                 </button>
               </div>

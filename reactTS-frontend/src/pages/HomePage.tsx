@@ -35,7 +35,7 @@ const HomePage = () => {
               className="w-full bg-black text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-800 transition-colors flex items-center justify-center"
             >
               Create New Thread
-              <IoMdAddCircle className="ml-2 text-xl" />
+              <IoMdAddCircle className={`ml-2 text-xl`} />
             </button>
           </div>
         )}

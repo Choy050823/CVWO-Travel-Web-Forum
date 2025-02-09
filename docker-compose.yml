@@ -1,0 +1,72 @@
+version: "3.8"
+
+services:
+  backend:
+    build: ./go-backend
+    ports:
+      - "8080:8080"
+    depends_on:  # THIS IS THE KEY FIX
+      - db
+      - db-migrate  # Backend DEPENDS on db-migrate
+    # secrets:
+    #   - db_user
+    #   - db_password
+    env_file:
+      - .env
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME}
+      FRONTEND_URL: ${FRONTEND_URL}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+    restart: always
+
+  db:
+    image: postgres:15
+    env_file:  # Add this line
+      - .env  # Load the .env file
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: scram-sha-256
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck: # Ensure db is ready
+      test: ["CMD-SHELL", "psql -U postgres -d $DB_NAME -c 'SELECT 1'"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  db-migrate: # Service to run migrations
+    build:
+      context: ./go-backend
+      dockerfile: Dockerfile # Use the same Dockerfile
+      args: # Set build arguments
+        MIGRATE_VERSION: ${MIGRATE_VERSION}
+    env_file:  # Add this line
+      - .env  # Load the .env file
+    depends_on:
+      db:
+        condition: service_healthy # Wait for healthcheck to pass
+    # secrets:
+    #   - db_user
+    #   - db_password
+    environment:
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      DB_PORT: 5432 # Important: Port inside the container
+    volumes:
+      - ./go-backend/migrations:/app/migrations
+    # command: ["migrate", "-path", "/app/migrations", "up"]
+    command: ["migrate", "-path", "/app/migrations", "-database", "postgres://${DB_USER}:${DB_PASSWORD}@db:${DB_PORT}/${DB_NAME}?sslmode=disable", "up"]
+    # command: ["tail", "-f", "/dev/null"]  # Override the command
+    restart: "no" # Run once and exit
+
+volumes:
+  db_data:
