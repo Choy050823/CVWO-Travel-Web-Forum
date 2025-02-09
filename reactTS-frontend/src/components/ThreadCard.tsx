@@ -4,7 +4,7 @@ import { Thread } from "../models/models";
 import { FaBookmark, FaEdit, FaTrash } from "react-icons/fa";
 import { useUser } from "../context/UserContext";
 import { useAuth } from "../context/AuthContext"; // Import useAuth to get the current user
-// import { useThreads } from "../context/ThreadContext";
+import { useThreads } from "../context/ThreadContext";
 
 interface ThreadCardProps {
   thread: Thread;
@@ -20,16 +20,16 @@ const ThreadCard: React.FC<ThreadCardProps> = ({
   const navigate = useNavigate();
   const { fetchUserDetails } = useUser();
   const { user } = useAuth(); // Get the current user from AuthContext
-  // const { fetchThreads } = useThreads();
+  const { fetchThreads } = useThreads();
   const [postedBy, setPostedBy] = React.useState<string>("Unknown User"); // Local state for user details
 
   React.useEffect(() => {
     const fetchUser = async () => {
       try {
         console.log("Current thread: ", thread.postedBy);
-        // if (thread.postedBy == undefined) {
-        //   await fetchThreads();
-        // }
+        if (thread.postedBy == undefined) {
+          await fetchThreads();
+        }
         const fetchedUser = await fetchUserDetails(thread.postedBy); // Fetch user details
         if (fetchedUser) {
           setPostedBy(fetchedUser.username); // Update local state
