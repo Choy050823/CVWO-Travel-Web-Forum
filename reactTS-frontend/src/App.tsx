@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, BrowserRouter } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { UserProvider } from "./context/UserContext"; // Import UserProvider
 import { ThreadProvider } from "./context/ThreadContext";
@@ -18,7 +18,7 @@ import { CommentProvider } from "./context/CommentContext";
 
 const App = () => {
   return (
-    // <BrowserRouter>
+    <BrowserRouter>
       <AuthProvider>
         <UserProvider>
           {/* Wrap with UserProvider */}
@@ -77,7 +77,7 @@ const App = () => {
           </ThreadProvider>
         </UserProvider>
       </AuthProvider>
-    // </BrowserRouter>
+    </BrowserRouter>
   );
 };
 
