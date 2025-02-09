@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { useThreads } from "../context/ThreadContext";
 import { useAuth } from "../context/AuthContext";
+import { useUser } from "../context/UserContext";
 // import BASE_URL from "../config";
 
 const BASE_URL = import.meta.env.VITE_API_URL;
@@ -10,6 +11,7 @@ const CreateEditThreadPage: React.FC = () => {
   const { id } = useParams();
   const { createThread, updateThread } = useThreads();
   const { user } = useAuth();
+  const { fetchUserDetails } = useUser();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -71,6 +73,7 @@ const CreateEditThreadPage: React.FC = () => {
       }
 
       navigate("/"); // Redirect to home page
+      await fetchUserDetails(thread.userId)
     } catch (error) {
       console.error("Error during thread submission:", error);
     }
