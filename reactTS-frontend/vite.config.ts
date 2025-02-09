@@ -10,7 +10,7 @@ export default defineConfig({
         // Project root
         "C:/Users/choym/OneDrive/Desktop/CVWO Intern/Travel Web Forum/reactTS-frontend",
         // Leaflet marker icons
-        "C:/Users/choym/OneDrive/Desktop/CVWO Intern/Travel Web Forum/node_modules/leaflet/dist/images",
+        // "C:/Users/choym/OneDrive/Desktop/CVWO Intern/Travel Web Forum/node_modules/leaflet/dist/images",
       ],
     },
   },
