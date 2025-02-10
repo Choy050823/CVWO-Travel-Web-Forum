@@ -33,9 +33,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
 
       console.log(`Fetching user details from API for userId: ${userId}`);
       const token = localStorage.getItem("token");
-      const url = token
-        ? `${BASE_URL}/api/users/${userId}`
-        : `${BASE_URL}/api/public/users/${userId}`;
+      const url = `${BASE_URL}/api/users/${userId}`;
 
       const response = await fetch(url, {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
